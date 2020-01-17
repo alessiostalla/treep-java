@@ -1,0 +1,7 @@
+#Maven build output
+target/
+#Emacs backup files
+*~
+#IntelliJ IDEA files
+.idea/
+*.iml
