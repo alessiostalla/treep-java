@@ -52,11 +52,13 @@ tree:
   (list | atom)+
   ({checkIndentation()}? INDENT{pushIndentation();} tree{popIndentation();})*;
 
-list: LPAREN (atom | list | INDENT)* RPAREN; //TODO use modes to remove indent token
+list: LPAREN (atom | list | INDENT)* RPAREN; //TODO use modes to remove indent token?
 atom: SYMBOL | ANY;
 
-SYMBOL: ('a'..'z' | 'A'..'Z') ('a'..'z' | 'A'..'Z' | '0'..'9')*; //TODO more characters
+SYMBOL: SYMBOL_STARTING_CHARACTER (SYMBOL_STARTING_CHARACTER | '0'..'9')*; //TODO more characters, escaping (using modes?)
 INDENT: ('\r'? '\n' | '\r') (' ' | '\t')*;
 LPAREN: '(';
 RPAREN: ')';
 ANY: .+?;
+
+fragment SYMBOL_STARTING_CHARACTER: 'a'..'z' | 'A'..'Z' | ':' | '+' | '-';
