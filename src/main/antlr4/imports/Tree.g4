@@ -1,8 +1,6 @@
-grammar BasicTree;
+grammar Tree;
 
 @header {
-    package treep.parser;
-
     import java.util.*;
 }
 
@@ -49,16 +47,11 @@ grammar BasicTree;
 topLevelTree: INDENT* (INDENT{pushIndentation();})? tree{resetIndentation();};
 
 tree:
-  (list | atom)+
+  node node*
   ({checkIndentation()}? INDENT{pushIndentation();} tree{popIndentation();})*;
 
-list: LPAREN (atom | list | INDENT)* RPAREN; //TODO use modes to remove indent token?
-atom: SYMBOL | ANY;
+node: SYMBOL;
 
-SYMBOL: SYMBOL_STARTING_CHARACTER (SYMBOL_STARTING_CHARACTER | '0'..'9')*; //TODO more characters, escaping (using modes?)
 INDENT: ('\r'? '\n' | '\r') (' ' | '\t')*;
-LPAREN: '(';
-RPAREN: ')';
-ANY: .+?;
-
-fragment SYMBOL_STARTING_CHARACTER: 'a'..'z' | 'A'..'Z' | ':' | '+' | '-';
+SYMBOL: (~(' ' | '\t' | '\r' | '\n'))+; //TODO escaping (using modes?)
+WS: (' ' | '\t' | '\r' | '\n');
