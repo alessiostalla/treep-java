@@ -54,4 +54,4 @@ node: SYMBOL;
 
 INDENT: ('\r'? '\n' | '\r') (' ' | '\t')*;
 SYMBOL: (~(' ' | '\t' | '\r' | '\n'))+; //TODO escaping (using modes?)
-WS: (' ' | '\t' | '\r' | '\n');
+WS: (' ' | '\t') -> skip; //TODO redirect to another channel?

@@ -38,19 +38,19 @@ public class TreepParserTest {
         TreepLexer lexer = new TreepLexer(CharStreams.fromString("a b"));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         TreepParser parser = new TreepParser(tokens);
-        TreepParser.TopLevelTreeContext tree = parser.topLevelTree();
+        TreepParser.TreeContext tree = parser.tree();
         assertEquals(0, parser.getNumberOfSyntaxErrors());
-        assertEquals(1, tree.children.size());
+        assertEquals(2, tree.children.size());
     }
 
     @Test
     public void treeOneLineTwoChildren() {
-        TreepLexer lexer = new TreepLexer(CharStreams.fromString("a b"));
+        TreepLexer lexer = new TreepLexer(CharStreams.fromString("a b c"));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         TreepParser parser = new TreepParser(tokens);
-        TreepParser.TopLevelTreeContext tree = parser.topLevelTree();
+        TreepParser.TreeContext tree = parser.tree();
         assertEquals(0, parser.getNumberOfSyntaxErrors());
-        assertEquals(1, tree.children.size());
+        assertEquals(3, tree.children.size());
     }
 
     @Test
@@ -64,7 +64,7 @@ public class TreepParserTest {
 
         tree = parser.topLevelTree();
         assertEquals(0, parser.getNumberOfSyntaxErrors());
-        assertEquals(2, tree.children.size());
+        assertEquals(2, tree.children.size()); //2 because one is the newline and the other is the actual tree
     }
 
     @Test
