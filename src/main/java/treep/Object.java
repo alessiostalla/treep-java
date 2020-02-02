@@ -1,4 +1,4 @@
-package treep.ast;
+package treep;
 
 public class Object {
 }

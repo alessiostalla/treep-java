@@ -1,4 +1,6 @@
-package treep.ast;
+package treep.symbols;
+
+import treep.Object;
 
 public class Symbol extends Object {
 

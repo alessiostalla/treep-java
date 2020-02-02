@@ -1,7 +1,7 @@
-package treep.ast;
+package treep;
 
 public interface ObjectFactory<T extends Object> {
 
-    T make(String literal);
+    T get(String literal);
 
 }

@@ -1,5 +1,7 @@
 package treep.ast;
 
+import treep.Object;
+
 public class Nothing extends Object implements Tree {
 
     public static final Nothing AT_ALL = new Nothing();

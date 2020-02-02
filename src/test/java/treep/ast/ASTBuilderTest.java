@@ -3,8 +3,10 @@ package treep.ast;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.junit.jupiter.api.Test;
+import treep.Object;
 import treep.parser.TreepLexer;
 import treep.parser.TreepParser;
+import treep.symbols.Symbol;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -17,9 +19,8 @@ public class ASTBuilderTest {
         TreepParser parser = new TreepParser(tokens);
         TreepParser.TreeContext tree = parser.tree();
         Object ast = new ASTBuilder().visit(tree);
-        assertTrue(ast instanceof Node);
-        assertTrue(((Node) ast).head instanceof Symbol);
-        assertEquals("a", ((Symbol) ((Node) ast).head).name);
+        assertTrue(ast instanceof Symbol);
+        assertEquals("a", ((Symbol) ast).name);
     }
 
     @Test
@@ -29,9 +30,8 @@ public class ASTBuilderTest {
         TreepParser parser = new TreepParser(tokens);
         TreepParser.TreeContext tree = parser.tree();
         Object ast = new ASTBuilder().visit(tree);
-        assertTrue(ast instanceof Node);
-        assertTrue(((Node) ast).head instanceof Number);
-        assertEquals("1", ((Number) ((Node) ast).head).value.toString());
+        assertTrue(ast instanceof Number);
+        assertEquals("1", ((Number) ast).value.toString());
     }
 
     @Test
@@ -79,9 +79,8 @@ public class ASTBuilderTest {
         TreepParser.TopLevelTreeContext topLevel = parser.topLevelTree();
         TreepParser.TreeContext tree = topLevel.tree();
         Object ast = new ASTBuilder().visit(tree);
-        assertTrue(ast instanceof Node);
-        assertTrue(((Node) ast).head instanceof Symbol);
-        assertEquals("a", ((Symbol) ((Node) ast).head).name);
+        assertTrue(ast instanceof Symbol);
+        assertEquals("a", ((Symbol) ast).name);
     }
 
 }
