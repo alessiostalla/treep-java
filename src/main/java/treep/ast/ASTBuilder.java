@@ -1,13 +1,11 @@
 package treep.ast;
 
 import org.antlr.v4.runtime.Token;
-import org.antlr.v4.runtime.tree.RuleNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import treep.Object;
 import treep.ObjectFactory;
 import treep.parser.TreepBaseVisitor;
 import treep.parser.TreepParser;
-import treep.symbols.NameSpace;
 import treep.symbols.Symbol;
 
 import java.math.BigDecimal;
@@ -18,9 +16,9 @@ public class ASTBuilder extends TreepBaseVisitor<Object> {
 
     protected final Map<Integer, ObjectFactory> objectFactoryMap = new HashMap<>();
 
-    {
+    public ASTBuilder(ObjectFactory<Symbol> symbolResolutionStrategy) {
         objectFactoryMap.put(TreepParser.NUMBER, literal -> new Number(new BigDecimal(literal)));
-        objectFactoryMap.put(TreepParser.SYMBOL, new NameSpace());
+        setSymbolResolutionStrategy(symbolResolutionStrategy);
     }
 
     @Override

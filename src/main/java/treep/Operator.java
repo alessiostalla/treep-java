@@ -1,24 +1,16 @@
 package treep;
 
-//TODO revise, implement apply varargs and have other overloads throw exceptions
+import treep.ast.Node;
+import treep.eval.Environment;
+
 public abstract class Operator extends Object {
 
-    public abstract Object apply(Object... arguments);
+    public abstract Object apply(Node form, Environment environment);
 
-    public Object apply() {
-        return apply(new Object[0]);
+    public static void checkRequiredNumberOfArguments(Node form, int requiredNumberOfArguments) {
+        int numberOfArguments = form.children.size();
+        if(numberOfArguments != requiredNumberOfArguments) {
+            throw new IllegalArgumentException("Invalid number of arguments: " + numberOfArguments); //TODO
+        }
     }
-
-    public Object apply(Object argument) {
-        return apply(new Object[] { argument });
-    }
-
-    public Object apply(Object argument1, Object argument2) {
-        return apply(new Object[] { argument1, argument2 });
-    }
-
-    public Object apply(Object argument1, Object argument2, Object argument3) {
-        return apply(new Object[] { argument1, argument2, argument3 });
-    }
-
 }

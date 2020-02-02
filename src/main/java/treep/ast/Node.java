@@ -10,11 +10,13 @@ public class Node extends Object implements Tree {
     public final PSequence<Object> children;
 
     public Node(Object head) {
-        this.head = head;
-        children = TreePVector.empty();
+        this(head, TreePVector.empty());
     }
 
-    protected Node(Object head, PSequence<Object> children) {
+    public Node(Object head, PSequence<Object> children) {
+        if(head == null) {
+            throw new IllegalArgumentException("Head cannot be null");
+        }
         this.head = head;
         this.children = children;
     }
@@ -22,6 +24,16 @@ public class Node extends Object implements Tree {
     @Override
     public Tree with(Object object) {
         return new Node(head, children.plus(object));
+    }
+
+    @Override
+    public Object getHead() {
+        return head;
+    }
+
+    @Override
+    public PSequence<Object> getChildren() {
+        return children;
     }
 
     public static Tree extend(Object tree, Object child) {

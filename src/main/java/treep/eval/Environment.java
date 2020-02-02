@@ -6,7 +6,7 @@ import org.pcollections.PMap;
 import treep.Object;
 import treep.symbols.Symbol;
 
-public class Environment {
+public class Environment extends Object {
 
     public final PMap<Symbol, Object> bindings;
 

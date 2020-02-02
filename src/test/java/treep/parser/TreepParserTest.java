@@ -34,6 +34,16 @@ public class TreepParserTest {
     }
 
     @Test
+    public void emptyTree() {
+        TreepLexer lexer = new TreepLexer(CharStreams.fromString("()"));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        TreepParser parser = new TreepParser(tokens);
+        TreepParser.TreeContext tree = parser.tree();
+        assertEquals(0, parser.getNumberOfSyntaxErrors());
+        assertEquals(1, tree.children.size());
+    }
+
+    @Test
     public void treeOneLineOneChild() {
         TreepLexer lexer = new TreepLexer(CharStreams.fromString("a b"));
         CommonTokenStream tokens = new CommonTokenStream(lexer);

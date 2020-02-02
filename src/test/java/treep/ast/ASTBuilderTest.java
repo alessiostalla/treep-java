@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import treep.Object;
 import treep.parser.TreepLexer;
 import treep.parser.TreepParser;
+import treep.symbols.NameSpace;
 import treep.symbols.Symbol;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -18,7 +19,7 @@ public class ASTBuilderTest {
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         TreepParser parser = new TreepParser(tokens);
         TreepParser.TreeContext tree = parser.tree();
-        Object ast = new ASTBuilder().visit(tree);
+        Object ast = new ASTBuilder(new NameSpace()).visit(tree);
         assertTrue(ast instanceof Symbol);
         assertEquals("a", ((Symbol) ast).name);
     }
@@ -29,9 +30,19 @@ public class ASTBuilderTest {
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         TreepParser parser = new TreepParser(tokens);
         TreepParser.TreeContext tree = parser.tree();
-        Object ast = new ASTBuilder().visit(tree);
+        Object ast = new ASTBuilder(new NameSpace()).visit(tree);
         assertTrue(ast instanceof Number);
         assertEquals("1", ((Number) ast).value.toString());
+    }
+
+    @Test
+    public void emptyTree() {
+        TreepLexer lexer = new TreepLexer(CharStreams.fromString("()"));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        TreepParser parser = new TreepParser(tokens);
+        TreepParser.TopLevelTreeContext tree = parser.topLevelTree();
+        Object ast = new ASTBuilder(new NameSpace()).visit(tree);
+        assertEquals(Nothing.AT_ALL, ast);
     }
 
     @Test
@@ -40,7 +51,7 @@ public class ASTBuilderTest {
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         TreepParser parser = new TreepParser(tokens);
         TreepParser.TopLevelTreeContext tree = parser.topLevelTree();
-        Object ast = new ASTBuilder().visit(tree);
+        Object ast = new ASTBuilder(new NameSpace()).visit(tree);
         assertTrue(ast instanceof Node);
         Node root = (Node) ast;
         assertTrue(root.head instanceof Symbol);
@@ -57,7 +68,7 @@ public class ASTBuilderTest {
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         TreepParser parser = new TreepParser(tokens);
         TreepParser.TopLevelTreeContext tree = parser.topLevelTree();
-        Object ast = new ASTBuilder().visit(tree);
+        Object ast = new ASTBuilder(new NameSpace()).visit(tree);
         assertTrue(ast instanceof Node);
         Node root = (Node) ast;
         assertTrue(root.head instanceof Symbol);
@@ -78,7 +89,7 @@ public class ASTBuilderTest {
         TreepParser parser = new TreepParser(tokens);
         TreepParser.TopLevelTreeContext topLevel = parser.topLevelTree();
         TreepParser.TreeContext tree = topLevel.tree();
-        Object ast = new ASTBuilder().visit(tree);
+        Object ast = new ASTBuilder(new NameSpace()).visit(tree);
         assertTrue(ast instanceof Symbol);
         assertEquals("a", ((Symbol) ast).name);
     }
