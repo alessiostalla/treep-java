@@ -1,12 +1,16 @@
-package treep.ast;
+package treep.read;
 
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
+import treep.builtin.datatypes.RealNumber;
 import treep.Object;
 import treep.ObjectFactory;
 import treep.parser.TreepBaseVisitor;
 import treep.parser.TreepParser;
-import treep.symbols.Symbol;
+import treep.builtin.datatypes.symbol.Symbol;
+import treep.builtin.datatypes.tree.Cons;
+import treep.builtin.datatypes.tree.Nothing;
+import treep.builtin.datatypes.tree.Tree;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -17,7 +21,7 @@ public class ASTBuilder extends TreepBaseVisitor<Object> {
     protected final Map<Integer, ObjectFactory> objectFactoryMap = new HashMap<>();
 
     public ASTBuilder(ObjectFactory<Symbol> symbolResolutionStrategy) {
-        objectFactoryMap.put(TreepParser.NUMBER, literal -> new Number(new BigDecimal(literal)));
+        objectFactoryMap.put(TreepParser.NUMBER, literal -> new RealNumber(new BigDecimal(literal)));
         setSymbolResolutionStrategy(symbolResolutionStrategy);
     }
 
@@ -28,11 +32,11 @@ public class ASTBuilder extends TreepBaseVisitor<Object> {
 
     @Override
     public Object visitTree(TreepParser.TreeContext ctx) {
-        Node result = (Node) super.visitTree(ctx);
-        if(result.children.size() == 0) {
-            return result.head;
+        Tree result = (Tree) super.visitTree(ctx);
+        if(result.getTail() == Nothing.AT_ALL) {
+            return result.getHead();
         } else {
-            return result;
+            return (Object) result;
         }
     }
 
@@ -53,7 +57,11 @@ public class ASTBuilder extends TreepBaseVisitor<Object> {
     @Override
     protected Object aggregateResult(Object aggregate, Object nextResult) {
         if(nextResult != null) {
-            return (Object) ((Tree) aggregate).with(nextResult);
+            if(nextResult instanceof Cons) {
+                return (Object) ((Tree) aggregate).with((Tree) new Cons(nextResult));
+            } else {
+                return (Object) ((Tree) aggregate).with(nextResult);
+            }
         } else {
             return aggregate;
         }

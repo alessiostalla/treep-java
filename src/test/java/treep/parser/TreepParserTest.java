@@ -34,7 +34,7 @@ public class TreepParserTest {
     }
 
     @Test
-    public void emptyTree() {
+    public void treeEmpty() {
         TreepLexer lexer = new TreepLexer(CharStreams.fromString("()"));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         TreepParser parser = new TreepParser(tokens);

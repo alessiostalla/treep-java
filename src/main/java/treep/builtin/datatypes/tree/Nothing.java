@@ -1,7 +1,5 @@
-package treep.ast;
+package treep.builtin.datatypes.tree;
 
-import org.pcollections.PSequence;
-import org.pcollections.TreePVector;
 import treep.Object;
 
 public class Nothing extends Object implements Tree {
@@ -11,8 +9,12 @@ public class Nothing extends Object implements Tree {
     private Nothing() {}
 
     @Override
-    public Tree with(Object object) {
-        return new Node(object);
+    public Tree with(Tree object) {
+        if(object == Nothing.AT_ALL) {
+            return new Cons((Object) object);
+        } else {
+            return object;
+        }
     }
 
     @Override
@@ -21,7 +23,7 @@ public class Nothing extends Object implements Tree {
     }
 
     @Override
-    public PSequence<Object> getChildren() {
-        return TreePVector.empty();
+    public Tree getTail() {
+        return this;
     }
 }

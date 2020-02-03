@@ -4,7 +4,7 @@ import org.pcollections.HashPMap;
 import org.pcollections.IntTreePMap;
 import org.pcollections.PMap;
 import treep.Object;
-import treep.symbols.Symbol;
+import treep.builtin.datatypes.symbol.Symbol;
 
 public class Environment extends Object {
 

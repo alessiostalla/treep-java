@@ -3,15 +3,14 @@ package treep.eval;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.junit.jupiter.api.Test;
-import treep.Function;
+import treep.builtin.datatypes.Function;
 import treep.Object;
-import treep.ast.ASTBuilder;
-import treep.ast.Node;
-import treep.ast.Number;
+import treep.read.ASTBuilder;
+import treep.builtin.datatypes.tree.Cons;
+import treep.builtin.datatypes.RealNumber;
 import treep.parser.TreepLexer;
 import treep.parser.TreepParser;
-import treep.symbols.NameSpace;
-import treep.symbols.Symbol;
+import treep.builtin.datatypes.symbol.Symbol;
 
 import java.math.BigDecimal;
 
@@ -33,7 +32,7 @@ public class SimpleEvaluatorTest {
         } catch (RuntimeException e) {
             //Ok
         }
-        Number value = new Number(new BigDecimal("1"));
+        RealNumber value = new RealNumber(new BigDecimal("1"));
         Symbol a = SimpleEvaluator.NAMESPACE_TREEP.get("a");
         assertEquals(value, new SimpleEvaluator().eval(ast, Environment.empty().extend(a, value)));
     }
@@ -46,8 +45,8 @@ public class SimpleEvaluatorTest {
         TreepParser.TreeContext tree = parser.tree();
         Object ast = new ASTBuilder(SimpleEvaluator.NAMESPACE_TREEP).visit(tree);
         Object result = new SimpleEvaluator().eval(ast);
-        assertTrue(result instanceof Number);
-        assertEquals(1, ((Number) result).value.intValue());
+        assertTrue(result instanceof RealNumber);
+        assertEquals(1, ((RealNumber) result).value.intValue());
     }
 
     @Test
@@ -58,7 +57,7 @@ public class SimpleEvaluatorTest {
         TreepParser.TopLevelTreeContext tree = parser.topLevelTree();
         ASTBuilder astBuilder = new ASTBuilder(SimpleEvaluator.NAMESPACE_TREEP);
         Object ast = astBuilder.visit(tree);
-        assertTrue(ast instanceof Node);
+        assertTrue(ast instanceof Cons);
         try {
             new SimpleEvaluator().eval(ast);
             fail("Exception expected: function not defined");
@@ -81,7 +80,7 @@ public class SimpleEvaluatorTest {
         }
 
         Symbol b = SimpleEvaluator.NAMESPACE_TREEP.get("b");
-        Number value = new Number(new BigDecimal("1"));
+        RealNumber value = new RealNumber(new BigDecimal("1"));
         Environment withValue = withFunction.extend(b, value);
 
         assertEquals(value, new SimpleEvaluator().eval(ast, withValue));
@@ -96,9 +95,9 @@ public class SimpleEvaluatorTest {
         ASTBuilder astBuilder = new ASTBuilder(SimpleEvaluator.NAMESPACE_TREEP);
         Object ast = astBuilder.visit(tree);
         Object object = new SimpleEvaluator().eval(ast);
-        assertTrue(object instanceof Node);
-        assertEquals(SimpleEvaluator.NAMESPACE_TREEP.intern("a"), ((Node) object).head);
-        assertEquals(SimpleEvaluator.NAMESPACE_TREEP.intern("b"), ((Node) object).children.get(0));
+        assertTrue(object instanceof Cons);
+        assertEquals(SimpleEvaluator.NAMESPACE_TREEP.intern("a"), ((Cons) object).head);
+        assertEquals(SimpleEvaluator.NAMESPACE_TREEP.intern("b"), ((Cons) object).tail.getHead());
     }
 
     @Test
@@ -112,8 +111,8 @@ public class SimpleEvaluatorTest {
         Object object = new SimpleEvaluator().eval(ast);
         assertTrue(object instanceof Function);
         Object result = ((Function) object).apply();
-        assertTrue(result instanceof Number);
-        assertEquals(new BigDecimal("3"), ((Number) result).value);
+        assertTrue(result instanceof RealNumber);
+        assertEquals(new BigDecimal("3"), ((RealNumber) result).value);
     }
 
 }

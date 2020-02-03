@@ -50,5 +50,9 @@ tree:
   node node*
   ({checkIndentation()}? INDENT{pushIndentation();} tree{popIndentation();})*;
 
+list: LPAREN (node | INDENT)* RPAREN; //TODO use modes to remove indent token?
+
+LPAREN: '(';
+RPAREN: ')';
 INDENT: ('\r'? '\n' | '\r') (' ' | '\t')*;
 WS: (' ' | '\t') -> skip; //TODO redirect to another channel?

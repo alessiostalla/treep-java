@@ -1,4 +1,6 @@
-package treep;
+package treep.builtin.datatypes;
+
+import treep.Object;
 
 public abstract class Function extends Object {
 

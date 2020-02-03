@@ -1,4 +1,4 @@
-package treep.symbols;
+package treep.builtin.datatypes.symbol;
 
 import treep.ObjectFactory;
 

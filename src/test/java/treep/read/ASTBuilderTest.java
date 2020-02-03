@@ -1,13 +1,16 @@
-package treep.ast;
+package treep.read;
 
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.junit.jupiter.api.Test;
+import treep.builtin.datatypes.RealNumber;
 import treep.Object;
 import treep.parser.TreepLexer;
 import treep.parser.TreepParser;
-import treep.symbols.NameSpace;
-import treep.symbols.Symbol;
+import treep.builtin.datatypes.symbol.NameSpace;
+import treep.builtin.datatypes.symbol.Symbol;
+import treep.builtin.datatypes.tree.Cons;
+import treep.builtin.datatypes.tree.Nothing;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -31,8 +34,8 @@ public class ASTBuilderTest {
         TreepParser parser = new TreepParser(tokens);
         TreepParser.TreeContext tree = parser.tree();
         Object ast = new ASTBuilder(new NameSpace()).visit(tree);
-        assertTrue(ast instanceof Number);
-        assertEquals("1", ((Number) ast).value.toString());
+        assertTrue(ast instanceof RealNumber);
+        assertEquals("1", ((RealNumber) ast).value.toString());
     }
 
     @Test
@@ -52,12 +55,12 @@ public class ASTBuilderTest {
         TreepParser parser = new TreepParser(tokens);
         TreepParser.TopLevelTreeContext tree = parser.topLevelTree();
         Object ast = new ASTBuilder(new NameSpace()).visit(tree);
-        assertTrue(ast instanceof Node);
-        Node root = (Node) ast;
+        assertTrue(ast instanceof Cons);
+        Cons root = (Cons) ast;
         assertTrue(root.head instanceof Symbol);
         assertEquals("a", ((Symbol) root.head).name);
-        assertEquals(1, root.children.size());
-        Object child = root.children.get(0);
+        assertEquals(1, root.tailSize());
+        Object child = root.tail.getHead();
         assertTrue(child instanceof Symbol);
         assertEquals("b", ((Symbol) child).name);
     }
@@ -69,15 +72,15 @@ public class ASTBuilderTest {
         TreepParser parser = new TreepParser(tokens);
         TreepParser.TopLevelTreeContext tree = parser.topLevelTree();
         Object ast = new ASTBuilder(new NameSpace()).visit(tree);
-        assertTrue(ast instanceof Node);
-        Node root = (Node) ast;
+        assertTrue(ast instanceof Cons);
+        Cons root = (Cons) ast;
         assertTrue(root.head instanceof Symbol);
         assertEquals("a", ((Symbol) root.head).name);
-        assertEquals(2, root.children.size());
-        Object child = root.children.get(0);
+        assertEquals(2, root.tailSize());
+        Object child = root.tail.getHead();
         assertTrue(child instanceof Symbol);
         assertEquals("b", ((Symbol) child).name);
-        child = root.children.get(1);
+        child = root.tail.getTail().getHead();
         assertTrue(child instanceof Symbol);
         assertEquals("c", ((Symbol) child).name);
     }

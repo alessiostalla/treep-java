@@ -1,16 +1,18 @@
 package treep.eval;
 
-import org.pcollections.PSequence;
-import treep.Function;
-import treep.Macro;
+import treep.builtin.datatypes.Function;
+import treep.builtin.datatypes.Macro;
 import treep.Object;
-import treep.Operator;
-import treep.ast.Node;
-import treep.ast.Nothing;
-import treep.ast.Tree;
-import treep.base.QuoteOperator;
-import treep.symbols.NameSpace;
-import treep.symbols.Symbol;
+import treep.builtin.datatypes.Operator;
+import treep.builtin.datatypes.tree.Cons;
+import treep.builtin.datatypes.tree.Nothing;
+import treep.builtin.datatypes.tree.Tree;
+import treep.builtin.operators.Quote;
+import treep.builtin.datatypes.symbol.NameSpace;
+import treep.builtin.datatypes.symbol.Symbol;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class SimpleEvaluator {
 
@@ -24,7 +26,7 @@ public class SimpleEvaluator {
     {
         Environment environment = Environment.empty();
         environment = environment.extend(SYMBOL_FUNCTION, new FunctionOperator());
-        environment = environment.extend(SYMBOL_QUOTE, new QuoteOperator());
+        environment = environment.extend(SYMBOL_QUOTE, new Quote());
         environment = environment.extend(SYMBOL_SEQUENTIALLY, new SequentiallyOperator());
         initialEnvironment = environment;
     }
@@ -38,20 +40,24 @@ public class SimpleEvaluator {
             return environment.bindings.computeIfAbsent((Symbol) expression, symbol -> {
                 throw new RuntimeException("Unbound: " + symbol); //TODO specific exception
             });
-        } else if(expression instanceof Node) {
-            Node node = (Node) expression;
-            Object head = node.head;
+        } else if(expression instanceof Cons) {
+            Tree tree = (Cons) expression;
+            Object head = tree.getHead();
             if(head instanceof Symbol) {
                 //TODO document this (Lisp-1)
                 Object operator = environment.bindings.get(head);
-                //TODO maybe optimize for 1, 2, 3 arguments
+                //TODO optimize for 1, 2, 3 arguments
                 if(operator instanceof Function) {
-                    Object[] arguments = node.children.stream().map(o -> eval(o, environment)).toArray(Object[]::new);
-                    return ((Function) operator).apply(arguments);
+                    List<Object> arguments = new ArrayList<>(2);
+                    while(tree.getTail() != Nothing.AT_ALL) {
+                        tree = tree.getTail();
+                        arguments.add(eval(tree.getHead(), environment));
+                    }
+                    return ((Function) operator).apply(arguments.toArray(new Object[0]));
                 } else if(operator instanceof Macro) {
-                    return eval(((Operator) operator).apply(node, environment), environment);
+                    return eval(((Operator) operator).apply(tree, environment), environment);
                 } else if(operator instanceof Operator) {
-                    return ((Operator) operator).apply(node, environment);
+                    return ((Operator) operator).apply(tree, environment);
                 } else {
                     return new SignalNoSuchOperatorError().apply(head);
                 }
@@ -87,10 +93,11 @@ public class SimpleEvaluator {
 
     public class SequentiallyOperator extends Operator {
         @Override
-        public Object apply(Node form, Environment environment) {
+        public Object apply(Tree form, Environment environment) {
             Object result = Nothing.AT_ALL;
-            for(Object expression : form.children) {
-                result = eval(expression, environment);
+            while (form.getTail() != Nothing.AT_ALL) {
+                form = form.getTail();
+                result = eval(form.getHead(), environment);
             }
             return result;
         }
@@ -99,9 +106,9 @@ public class SimpleEvaluator {
     public class FunctionOperator extends Operator {
 
         @Override
-        public Object apply(Node form, Environment environment) {
-            if(form.children.size() == 1) {
-                Object nameOrFunction = form.children.get(0);
+        public Object apply(Tree form, Environment environment) {
+            if(form.getTail().getTail() == Nothing.AT_ALL) {
+                Object nameOrFunction = form.getTail().getHead();
                 if(nameOrFunction instanceof Function) {
                     return nameOrFunction;
                 }
@@ -111,22 +118,22 @@ public class SimpleEvaluator {
                 } else {
                     throw new IllegalArgumentException("Not a function: " + nameOrFunction); //TODO
                 }
-            } else if(form.children.size() > 1) {
-                Object argumentsList = form.children.get(0);
+            } else {
+                Object argumentsList = form.getTail().getHead();
                 if(argumentsList instanceof Tree) {
-                    PSequence<Object> body = form.children.subList(1, form.children.size());
+                    Tree body = form.getTail().getTail();
                     if(((Tree) argumentsList).getHead() == Nothing.AT_ALL) {
+                        //TODO check tail is empty too
                         return new InterpretedFunction0(body, environment);
-                    } else if(((Tree) argumentsList).getChildren().size() == 0) {
+                    } else if(((Tree) argumentsList).getTail() == Nothing.AT_ALL) {
                         return new InterpretedFunction1(body, environment, (Symbol) ((Tree) argumentsList).getHead()); //TODO check
                     } else { //TODO other cases
-                        return new InterpretedFunctionN(body, environment, (PSequence) ((Tree) argumentsList).getChildren().plus(0, ((Tree) argumentsList).getHead())); //TODO check
+                        return new InterpretedFunctionN(body, environment, (Cons) argumentsList); //TODO check
                     }
                 } else {
                     throw new IllegalArgumentException("Not an arguments list: " + argumentsList); //TODO
                 }
             }
-            throw new IllegalArgumentException("Not a function: " + form); //TODO
         }
     }
 
@@ -135,14 +142,14 @@ public class SimpleEvaluator {
         public final Object body;
         public final Environment enclosingEnvironment;
 
-        public InterpretedFunction(PSequence<Object> body, Environment enclosingEnvironment) {
-            this.body = new Node(SYMBOL_SEQUENTIALLY, body);
+        public InterpretedFunction(Tree body, Environment enclosingEnvironment) {
+            this.body = new Cons(SYMBOL_SEQUENTIALLY, body);
             this.enclosingEnvironment = enclosingEnvironment;
         }
     }
 
     public class InterpretedFunction0 extends InterpretedFunction {
-        public InterpretedFunction0(PSequence<Object> body, Environment enclosingEnvironment) {
+        public InterpretedFunction0(Tree body, Environment enclosingEnvironment) {
             super(body, enclosingEnvironment);
         }
 
@@ -156,7 +163,7 @@ public class SimpleEvaluator {
 
         public final Symbol argumentName;
 
-        public InterpretedFunction1(PSequence<Object> body, Environment enclosingEnvironment, Symbol argumentName) {
+        public InterpretedFunction1(Tree body, Environment enclosingEnvironment, Symbol argumentName) {
             super(body, enclosingEnvironment);
             this.argumentName = argumentName;
         }
@@ -169,22 +176,23 @@ public class SimpleEvaluator {
 
     public class InterpretedFunctionN extends InterpretedFunction {
 
-        public final PSequence<Symbol> argumentNames;
+        public final Cons argumentNames;
 
-        public InterpretedFunctionN(PSequence<Object> body, Environment enclosingEnvironment, PSequence<Symbol> argumentNames) {
+        public InterpretedFunctionN(Tree body, Environment enclosingEnvironment, Cons argumentNames) {
             super(body, enclosingEnvironment);
-            this.argumentNames = argumentNames;
+            this.argumentNames = argumentNames;  //TODO check they are all symbols
         }
 
         @Override
         public Object apply(Object... arguments) {
-            if(argumentNames.size() != arguments.length) { //TODO
+            if(argumentNames.tailSize() + 1 != arguments.length) { //TODO
                 throw new IllegalArgumentException("Invalid arguments"); //TODO
             }
             Environment environment = enclosingEnvironment;
-            int i = 0;
-            for(Symbol symbol : argumentNames) {
-                environment = environment.extend(symbol, arguments[i++]);
+            Tree arg = argumentNames;
+            for(int i = 0; i < arguments.length; i++) {
+                environment = environment.extend((Symbol) arg.getHead(), arguments[i]);
+                arg = arg.getTail();
             }
             return eval(body, environment);
         }
