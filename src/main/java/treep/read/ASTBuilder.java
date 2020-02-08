@@ -1,16 +1,19 @@
 package treep.read;
 
 import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
-import treep.builtin.datatypes.RealNumber;
+import org.pcollections.Empty;
+import org.pcollections.PStack;
 import treep.Object;
 import treep.ObjectFactory;
-import treep.parser.TreepBaseVisitor;
-import treep.parser.TreepParser;
+import treep.builtin.datatypes.RealNumber;
 import treep.builtin.datatypes.symbol.Symbol;
 import treep.builtin.datatypes.tree.Cons;
 import treep.builtin.datatypes.tree.Nothing;
 import treep.builtin.datatypes.tree.Tree;
+import treep.parser.TreepBaseVisitor;
+import treep.parser.TreepParser;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -32,12 +35,34 @@ public class ASTBuilder extends TreepBaseVisitor<Object> {
 
     @Override
     public Object visitTree(TreepParser.TreeContext ctx) {
-        Tree result = (Tree) super.visitTree(ctx);
-        if(result.getTail() == Nothing.AT_ALL) {
-            return result.getHead();
-        } else {
-            return (Object) result;
+        PStack<Object> children = Empty.stack();
+        if(ctx.node().size() == 1 && ctx.tree().isEmpty()) {
+            return ctx.node(0).accept(this);
         }
+        for(ParseTree node : ctx.node()) {
+            children = children.plus(node.accept(this));
+        }
+        for(ParseTree subtree : ctx.tree()) {
+            children = children.plus(subtree.accept(this));
+        }
+        Tree tree = Nothing.AT_ALL;
+        for(Object child : children) {
+            tree = new Cons(child, tree);
+        }
+        return (Object) tree;
+    }
+
+    @Override
+    public Object visitList(TreepParser.ListContext ctx) {
+        PStack<Object> children = Empty.stack();
+        for(ParseTree node : ctx.node()) {
+            children = children.plus(node.accept(this));
+        }
+        Tree list = Nothing.AT_ALL;
+        for(Object child : children) {
+            list = new Cons(child, list);
+        }
+        return (Object) list;
     }
 
     @Override
@@ -46,24 +71,6 @@ public class ASTBuilder extends TreepBaseVisitor<Object> {
             return visitToken(ctx.atom);
         } else {
             return visit(ctx.list());
-        }
-    }
-
-    @Override
-    protected Object defaultResult() {
-        return Nothing.AT_ALL;
-    }
-
-    @Override
-    protected Object aggregateResult(Object aggregate, Object nextResult) {
-        if(nextResult != null) {
-            if(nextResult instanceof Cons) {
-                return (Object) ((Tree) aggregate).with((Tree) new Cons(nextResult));
-            } else {
-                return (Object) ((Tree) aggregate).with(nextResult);
-            }
-        } else {
-            return aggregate;
         }
     }
 

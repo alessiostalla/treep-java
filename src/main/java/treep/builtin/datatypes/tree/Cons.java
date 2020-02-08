@@ -19,10 +19,6 @@ public class Cons extends Object implements Tree {
         this.tail = tail;
     }
 
-    public Tree with(Tree tree) {
-        return new Cons(head, tail.with(tree));
-    }
-
     @Override
     public Object getHead() {
         return head;
@@ -33,11 +29,4 @@ public class Cons extends Object implements Tree {
         return tail;
     }
 
-    public static Tree extend(Object tree, Object child) {
-        if(tree instanceof Tree) {
-            return ((Tree) tree).with(child);
-        } else {
-            return new Cons(tree).with(child);
-        }
-    }
 }

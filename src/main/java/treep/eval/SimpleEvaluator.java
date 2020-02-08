@@ -19,9 +19,11 @@ public class SimpleEvaluator {
     public final Environment initialEnvironment;
     public static final NameSpace NAMESPACE_TREEP = new NameSpace();
 
+    public static final Symbol SYMBOL_BIND = NAMESPACE_TREEP.intern("bind");
     public static final Symbol SYMBOL_FUNCTION = NAMESPACE_TREEP.intern("function");
     public static final Symbol SYMBOL_QUOTE = NAMESPACE_TREEP.intern("quote");
     public static final Symbol SYMBOL_SEQUENTIALLY = NAMESPACE_TREEP.intern("sequentially");
+    public static final Symbol SYMBOL_THE_ENVIRONMENT = NAMESPACE_TREEP.intern("the-environment");
 
     {
         Environment environment = Environment.empty();
@@ -37,36 +39,55 @@ public class SimpleEvaluator {
 
     public Object eval(Object expression, Environment environment) {
         if(expression instanceof Symbol) {
-            return environment.bindings.computeIfAbsent((Symbol) expression, symbol -> {
-                throw new RuntimeException("Unbound: " + symbol); //TODO specific exception
-            });
+            return eval(new Cons(expression), environment);
         } else if(expression instanceof Cons) {
             Tree tree = (Cons) expression;
             Object head = tree.getHead();
             if(head instanceof Symbol) {
-                //TODO document this (Lisp-1)
-                Object operator = environment.bindings.get(head);
-                //TODO optimize for 1, 2, 3 arguments
-                if(operator instanceof Function) {
-                    List<Object> arguments = new ArrayList<>(2);
-                    while(tree.getTail() != Nothing.AT_ALL) {
-                        tree = tree.getTail();
-                        arguments.add(eval(tree.getHead(), environment));
-                    }
-                    return ((Function) operator).apply(arguments.toArray(new Object[0]));
-                } else if(operator instanceof Macro) {
-                    return eval(((Operator) operator).apply(tree, environment), environment);
-                } else if(operator instanceof Operator) {
-                    return ((Operator) operator).apply(tree, environment);
-                } else {
-                    return new SignalNoSuchOperatorError().apply(head);
-                }
+                return evalApplication((Symbol) head, tree, environment);
+            } else if(head instanceof Function) {
+                return evalFunctionApplication((Function) head, tree, environment);
+            } else if(head instanceof Operator) {
+                return evalOperatorApplication((Operator) head, tree, environment);
+            } else if(tree.getTail() == Nothing.AT_ALL) {
+                return tree.getHead();
             } else {
                 return new SignalInvalidExpression().apply(expression);
             }
         } else {
             return expression;
         }
+    }
+
+    public Object evalApplication(Symbol head, Tree tree, Environment environment) {
+        //TODO document this (Lisp-1)
+        Object operator = environment.bindings.get(head);
+        if(operator instanceof Function) {
+            return evalFunctionApplication((Function) operator, tree, environment);
+        } else if(operator instanceof Operator) {
+            return evalOperatorApplication((Operator) operator, tree, environment);
+        } else {
+            return new SignalNoSuchOperatorError().apply(head);
+        }
+    }
+
+    public Object evalOperatorApplication(Operator operator, Tree expression, Environment environment) {
+        Object result = operator.apply(expression, environment);
+        if(operator instanceof Macro) {
+            return eval(result, environment);
+        } else {
+            return result;
+        }
+    }
+
+    public Object evalFunctionApplication(Function function, Tree expression, Environment environment) {
+        //TODO optimize for 1, 2, 3 arguments
+        List<Object> arguments = new ArrayList<>(2);
+        while(expression.getTail() != Nothing.AT_ALL) {
+            expression = expression.getTail();
+            arguments.add(eval(expression.getHead(), environment));
+        }
+        return function.apply(arguments.toArray(new Object[0]));
     }
 
     public static class SignalNoSuchOperatorError extends Function {
@@ -90,6 +111,25 @@ public class SimpleEvaluator {
         }
 
     }
+
+    public class ApplyFunction extends Closure {
+        public ApplyFunction(Environment enclosingEnvironment) {
+            super(enclosingEnvironment);
+        }
+
+        @Override
+        public Object apply(Object... arguments) {
+            if(arguments.length == 0) {
+                return super.apply();
+            } else if(!(arguments[0] instanceof Function)) {
+                throw new IllegalArgumentException("Not a function: " + arguments[0]); //TODO
+            } else {
+                //TODO optimize for 1, 2, 3 arguments
+                return ((Function) arguments[0]).apply(arguments);
+            }
+        }
+    }
+
 
     public class SequentiallyOperator extends Operator {
         @Override
@@ -137,14 +177,21 @@ public class SimpleEvaluator {
         }
     }
 
-    public static class InterpretedFunction extends Function {
-
-        public final Object body;
+    public static class Closure extends Function {
         public final Environment enclosingEnvironment;
 
-        public InterpretedFunction(Tree body, Environment enclosingEnvironment) {
-            this.body = new Cons(SYMBOL_SEQUENTIALLY, body);
+        public Closure(Environment enclosingEnvironment) {
             this.enclosingEnvironment = enclosingEnvironment;
+        }
+    }
+
+    public static class InterpretedFunction extends Closure {
+
+        public final Object body;
+
+        public InterpretedFunction(Tree body, Environment enclosingEnvironment) {
+            super(enclosingEnvironment);
+            this.body = new Cons(SYMBOL_SEQUENTIALLY, body);
         }
     }
 

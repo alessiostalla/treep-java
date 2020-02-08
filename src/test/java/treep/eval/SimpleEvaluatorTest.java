@@ -54,7 +54,7 @@ public class SimpleEvaluatorTest {
         TreepLexer lexer = new TreepLexer(CharStreams.fromString("a b"));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         TreepParser parser = new TreepParser(tokens);
-        TreepParser.TopLevelTreeContext tree = parser.topLevelTree();
+        TreepParser.TreeContext tree = parser.tree();
         ASTBuilder astBuilder = new ASTBuilder(SimpleEvaluator.NAMESPACE_TREEP);
         Object ast = astBuilder.visit(tree);
         assertTrue(ast instanceof Cons);
@@ -105,7 +105,7 @@ public class SimpleEvaluatorTest {
         TreepLexer lexer = new TreepLexer(CharStreams.fromString("function () 3"));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         TreepParser parser = new TreepParser(tokens);
-        TreepParser.TopLevelTreeContext tree = parser.topLevelTree();
+        TreepParser.TreeContext tree = parser.tree();
         ASTBuilder astBuilder = new ASTBuilder(SimpleEvaluator.NAMESPACE_TREEP);
         Object ast = astBuilder.visit(tree);
         Object object = new SimpleEvaluator().eval(ast);

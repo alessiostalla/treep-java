@@ -85,6 +85,8 @@ public class TreepParserTest {
         TreepParser.TopLevelTreeContext tree = parser.topLevelTree();
         assertNotNull(tree);
         assertEquals(0, parser.getNumberOfSyntaxErrors());
+        assertEquals(1, tree.children.size());
+        assertEquals(7, tree.tree().children.size());
     }
 
     @Test
@@ -132,9 +134,16 @@ public class TreepParserTest {
         TreepLexer lexer = new TreepLexer(CharStreams.fromString("(one\ntwo)"));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         TreepParser parser = new TreepParser(tokens);
-        TreepParser.TopLevelTreeContext tree = parser.topLevelTree();
-        assertNotNull(tree);
+        TreepParser.ListContext list = parser.list();
         assertEquals(0, parser.getNumberOfSyntaxErrors());
+        assertNotNull(list);
+
+        lexer = new TreepLexer(CharStreams.fromString("(one\ntwo)"));
+        tokens = new CommonTokenStream(lexer);
+        parser = new TreepParser(tokens);
+        TreepParser.TopLevelTreeContext tree = parser.topLevelTree();
+        assertEquals(0, parser.getNumberOfSyntaxErrors());
+        assertNotNull(tree);
     }
 
     @Test

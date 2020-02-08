@@ -4,19 +4,9 @@ import treep.Object;
 
 public interface Tree {
 
-    Tree with(Tree tail);
-
     Object getHead();
 
     Tree getTail();
-
-    default Tree with(Object object) {
-        if(object instanceof Tree) {
-            return with((Tree) object);
-        } else {
-            return with((Tree) new Cons(object));
-        }
-    }
 
     default int tailSize() {
         int size = 0;
