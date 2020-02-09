@@ -1,6 +1,6 @@
-package treep.builtin.datatypes.tree;
+package treep.language.datatypes.tree;
 
-import treep.Object;
+import treep.language.Object;
 
 public interface Tree {
 

@@ -1,4 +1,4 @@
-package treep;
+package treep.language;
 
 public class Object {
 }

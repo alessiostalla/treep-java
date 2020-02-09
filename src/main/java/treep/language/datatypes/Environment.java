@@ -1,13 +1,10 @@
-package treep.eval;
+package treep.language.datatypes;
 
 import org.pcollections.Empty;
-import org.pcollections.HashPMap;
-import org.pcollections.IntTreePMap;
 import org.pcollections.PMap;
-import treep.Object;
-import treep.builtin.datatypes.Function;
-import treep.builtin.datatypes.Operator;
-import treep.builtin.datatypes.symbol.Symbol;
+import treep.language.Object;
+import treep.language.datatypes.symbol.Symbol;
+import treep.language.eval.SimpleEvaluator;
 
 public class Environment extends Object {
 
@@ -27,7 +24,7 @@ public class Environment extends Object {
     }
 
     public static Environment empty() {
-        return new Environment(HashPMap.empty(IntTreePMap.empty()));
+        return new Environment(Empty.map());
     }
 
     public static class Binding extends Function {

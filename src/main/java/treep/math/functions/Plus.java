@@ -1,8 +1,8 @@
-package treep.builtin.functions;
+package treep.math.functions;
 
-import treep.Object;
-import treep.builtin.datatypes.Function;
-import treep.builtin.datatypes.RealNumber;
+import treep.language.Object;
+import treep.language.datatypes.Function;
+import treep.math.RealNumber;
 
 public class Plus extends Function {
 

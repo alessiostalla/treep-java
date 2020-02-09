@@ -1,21 +1,17 @@
-package treep.read;
+package treep.language;
 
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.pcollections.Empty;
 import org.pcollections.PStack;
-import treep.Object;
-import treep.ObjectFactory;
-import treep.builtin.datatypes.RealNumber;
-import treep.builtin.datatypes.symbol.Symbol;
-import treep.builtin.datatypes.tree.Cons;
-import treep.builtin.datatypes.tree.Nothing;
-import treep.builtin.datatypes.tree.Tree;
+import treep.language.datatypes.symbol.Symbol;
+import treep.language.datatypes.tree.Cons;
+import treep.language.datatypes.tree.Nothing;
+import treep.language.datatypes.tree.Tree;
 import treep.parser.TreepBaseVisitor;
 import treep.parser.TreepParser;
 
-import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,7 +20,6 @@ public class ASTBuilder extends TreepBaseVisitor<Object> {
     protected final Map<Integer, ObjectFactory> objectFactoryMap = new HashMap<>();
 
     public ASTBuilder(ObjectFactory<Symbol> symbolResolutionStrategy) {
-        objectFactoryMap.put(TreepParser.NUMBER, literal -> new RealNumber(new BigDecimal(literal)));
         setSymbolResolutionStrategy(symbolResolutionStrategy);
     }
 
@@ -81,11 +76,11 @@ public class ASTBuilder extends TreepBaseVisitor<Object> {
     }
 
     protected Object visitToken(Token token) {
-        ObjectFactory objectFactory = objectFactoryMap.get(token.getType());
+        ObjectFactory<?> objectFactory = objectFactoryMap.get(token.getType());
         if(objectFactory != null) {
             return objectFactory.get(token.getText());
         } else {
-            return null;
+            throw new IllegalArgumentException("Unsupported token: " + token);
         }
     }
 

@@ -1,16 +1,18 @@
-package treep.eval;
+package treep.language.eval;
 
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.junit.jupiter.api.Test;
-import treep.builtin.datatypes.Function;
-import treep.Object;
-import treep.read.ASTBuilder;
-import treep.builtin.datatypes.tree.Cons;
-import treep.builtin.datatypes.RealNumber;
+import treep.language.datatypes.Environment;
+import treep.language.datatypes.Function;
+import treep.language.Object;
+import treep.language.ASTBuilder;
+import treep.language.datatypes.tree.Cons;
+import treep.math.Math;
+import treep.math.RealNumber;
 import treep.parser.TreepLexer;
 import treep.parser.TreepParser;
-import treep.builtin.datatypes.symbol.Symbol;
+import treep.language.datatypes.symbol.Symbol;
 
 import java.math.BigDecimal;
 
@@ -27,7 +29,7 @@ public class SimpleEvaluatorTest {
         ASTBuilder astBuilder = new ASTBuilder(SimpleEvaluator.NAMESPACE_TREEP);
         Object ast = astBuilder.visit(tree);
         try {
-            new SimpleEvaluator().eval(ast);
+            new SimpleEvaluator().apply(ast);
             fail("Exception expected");
         } catch (RuntimeException e) {
             //Ok
@@ -43,8 +45,10 @@ public class SimpleEvaluatorTest {
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         TreepParser parser = new TreepParser(tokens);
         TreepParser.TreeContext tree = parser.tree();
-        Object ast = new ASTBuilder(SimpleEvaluator.NAMESPACE_TREEP).visit(tree);
-        Object result = new SimpleEvaluator().eval(ast);
+        ASTBuilder astBuilder = new ASTBuilder(SimpleEvaluator.NAMESPACE_TREEP);
+        Math.addSupportForNumbers(astBuilder);
+        Object ast = astBuilder.visit(tree);
+        Object result = new SimpleEvaluator().apply(ast);
         assertTrue(result instanceof RealNumber);
         assertEquals(1, ((RealNumber) result).value.intValue());
     }
@@ -59,7 +63,7 @@ public class SimpleEvaluatorTest {
         Object ast = astBuilder.visit(tree);
         assertTrue(ast instanceof Cons);
         try {
-            new SimpleEvaluator().eval(ast);
+            new SimpleEvaluator().apply(ast);
             fail("Exception expected: function not defined");
         } catch (RuntimeException e) {
             //Ok
@@ -94,7 +98,7 @@ public class SimpleEvaluatorTest {
         TreepParser.TopLevelTreeContext tree = parser.topLevelTree();
         ASTBuilder astBuilder = new ASTBuilder(SimpleEvaluator.NAMESPACE_TREEP);
         Object ast = astBuilder.visit(tree);
-        Object object = new SimpleEvaluator().eval(ast);
+        Object object = new SimpleEvaluator().apply(ast);
         assertTrue(object instanceof Cons);
         assertEquals(SimpleEvaluator.NAMESPACE_TREEP.intern("a"), ((Cons) object).head);
         assertEquals(SimpleEvaluator.NAMESPACE_TREEP.intern("b"), ((Cons) object).tail.getHead());
@@ -107,8 +111,9 @@ public class SimpleEvaluatorTest {
         TreepParser parser = new TreepParser(tokens);
         TreepParser.TreeContext tree = parser.tree();
         ASTBuilder astBuilder = new ASTBuilder(SimpleEvaluator.NAMESPACE_TREEP);
+        Math.addSupportForNumbers(astBuilder);
         Object ast = astBuilder.visit(tree);
-        Object object = new SimpleEvaluator().eval(ast);
+        Object object = new SimpleEvaluator().apply(ast);
         assertTrue(object instanceof Function);
         Object result = ((Function) object).apply();
         assertTrue(result instanceof RealNumber);

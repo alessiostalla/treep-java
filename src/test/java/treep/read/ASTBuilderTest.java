@@ -3,14 +3,16 @@ package treep.read;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.junit.jupiter.api.Test;
-import treep.builtin.datatypes.RealNumber;
-import treep.Object;
+import treep.language.ASTBuilder;
+import treep.math.Math;
+import treep.math.RealNumber;
+import treep.language.Object;
 import treep.parser.TreepLexer;
 import treep.parser.TreepParser;
-import treep.builtin.datatypes.symbol.NameSpace;
-import treep.builtin.datatypes.symbol.Symbol;
-import treep.builtin.datatypes.tree.Cons;
-import treep.builtin.datatypes.tree.Nothing;
+import treep.language.datatypes.symbol.NameSpace;
+import treep.language.datatypes.symbol.Symbol;
+import treep.language.datatypes.tree.Cons;
+import treep.language.datatypes.tree.Nothing;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -33,7 +35,9 @@ public class ASTBuilderTest {
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         TreepParser parser = new TreepParser(tokens);
         TreepParser.TreeContext tree = parser.tree();
-        Object ast = new ASTBuilder(new NameSpace()).visit(tree);
+        ASTBuilder astBuilder = new ASTBuilder(new NameSpace());
+        Math.addSupportForNumbers(astBuilder);
+        Object ast = astBuilder.visit(tree);
         assertTrue(ast instanceof RealNumber);
         assertEquals("1", ((RealNumber) ast).value.toString());
     }

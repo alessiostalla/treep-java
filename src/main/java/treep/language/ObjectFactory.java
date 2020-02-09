@@ -1,4 +1,4 @@
-package treep;
+package treep.language;
 
 public interface ObjectFactory<T extends Object> {
 

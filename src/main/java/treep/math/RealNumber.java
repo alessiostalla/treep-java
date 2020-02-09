@@ -1,6 +1,6 @@
-package treep.builtin.datatypes;
+package treep.math;
 
-import treep.Object;
+import treep.language.Object;
 
 import java.math.BigDecimal;
 

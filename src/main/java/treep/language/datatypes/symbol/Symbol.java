@@ -1,6 +1,6 @@
-package treep.builtin.datatypes.symbol;
+package treep.language.datatypes.symbol;
 
-import treep.Object;
+import treep.language.Object;
 
 public class Symbol extends Object {
 

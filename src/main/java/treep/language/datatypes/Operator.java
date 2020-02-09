@@ -1,8 +1,7 @@
-package treep.builtin.datatypes;
+package treep.language.datatypes;
 
-import treep.Object;
-import treep.eval.Environment;
-import treep.builtin.datatypes.tree.Tree;
+import treep.language.Object;
+import treep.language.datatypes.tree.Tree;
 
 public abstract class Operator extends Object {
 

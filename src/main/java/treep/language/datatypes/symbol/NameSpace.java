@@ -1,6 +1,6 @@
-package treep.builtin.datatypes.symbol;
+package treep.language.datatypes.symbol;
 
-import treep.ObjectFactory;
+import treep.language.ObjectFactory;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
