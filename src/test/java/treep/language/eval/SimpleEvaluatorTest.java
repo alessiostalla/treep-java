@@ -8,7 +8,7 @@ import treep.language.datatypes.Function;
 import treep.language.Object;
 import treep.language.ASTBuilder;
 import treep.language.datatypes.tree.Cons;
-import treep.math.Math;
+import treep.language.read.SimpleDatumParser;
 import treep.math.RealNumber;
 import treep.parser.TreepLexer;
 import treep.parser.TreepParser;
@@ -26,7 +26,7 @@ public class SimpleEvaluatorTest {
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         TreepParser parser = new TreepParser(tokens);
         TreepParser.TreeContext tree = parser.tree();
-        ASTBuilder astBuilder = new ASTBuilder(SimpleEvaluator.NAMESPACE_TREEP);
+        ASTBuilder astBuilder = new ASTBuilder(new SimpleDatumParser(SimpleEvaluator.NAMESPACE_TREEP));
         Object ast = astBuilder.visit(tree);
         try {
             new SimpleEvaluator().apply(ast);
@@ -35,7 +35,7 @@ public class SimpleEvaluatorTest {
             //Ok
         }
         RealNumber value = new RealNumber(new BigDecimal("1"));
-        Symbol a = SimpleEvaluator.NAMESPACE_TREEP.get("a");
+        Symbol a = SimpleEvaluator.NAMESPACE_TREEP.intern("a");
         assertEquals(value, new SimpleEvaluator().eval(ast, Environment.empty().extend(a, value)));
     }
 
@@ -45,8 +45,7 @@ public class SimpleEvaluatorTest {
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         TreepParser parser = new TreepParser(tokens);
         TreepParser.TreeContext tree = parser.tree();
-        ASTBuilder astBuilder = new ASTBuilder(SimpleEvaluator.NAMESPACE_TREEP);
-        Math.addSupportForNumbers(astBuilder);
+        ASTBuilder astBuilder = new ASTBuilder(new SimpleDatumParser(SimpleEvaluator.NAMESPACE_TREEP));
         Object ast = astBuilder.visit(tree);
         Object result = new SimpleEvaluator().apply(ast);
         assertTrue(result instanceof RealNumber);
@@ -59,7 +58,7 @@ public class SimpleEvaluatorTest {
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         TreepParser parser = new TreepParser(tokens);
         TreepParser.TreeContext tree = parser.tree();
-        ASTBuilder astBuilder = new ASTBuilder(SimpleEvaluator.NAMESPACE_TREEP);
+        ASTBuilder astBuilder = new ASTBuilder(new SimpleDatumParser(SimpleEvaluator.NAMESPACE_TREEP));
         Object ast = astBuilder.visit(tree);
         assertTrue(ast instanceof Cons);
         try {
@@ -69,7 +68,7 @@ public class SimpleEvaluatorTest {
             //Ok
         }
 
-        Symbol a = SimpleEvaluator.NAMESPACE_TREEP.get("a");
+        Symbol a = SimpleEvaluator.NAMESPACE_TREEP.intern("a");
         Environment withFunction = Environment.empty().extend(a, new Function() {
             @Override
             public Object apply(Object... arguments) {
@@ -83,7 +82,7 @@ public class SimpleEvaluatorTest {
             //Ok
         }
 
-        Symbol b = SimpleEvaluator.NAMESPACE_TREEP.get("b");
+        Symbol b = SimpleEvaluator.NAMESPACE_TREEP.intern("b");
         RealNumber value = new RealNumber(new BigDecimal("1"));
         Environment withValue = withFunction.extend(b, value);
 
@@ -96,7 +95,7 @@ public class SimpleEvaluatorTest {
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         TreepParser parser = new TreepParser(tokens);
         TreepParser.TopLevelTreeContext tree = parser.topLevelTree();
-        ASTBuilder astBuilder = new ASTBuilder(SimpleEvaluator.NAMESPACE_TREEP);
+        ASTBuilder astBuilder = new ASTBuilder(new SimpleDatumParser(SimpleEvaluator.NAMESPACE_TREEP));
         Object ast = astBuilder.visit(tree);
         Object object = new SimpleEvaluator().apply(ast);
         assertTrue(object instanceof Cons);
@@ -110,8 +109,7 @@ public class SimpleEvaluatorTest {
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         TreepParser parser = new TreepParser(tokens);
         TreepParser.TreeContext tree = parser.tree();
-        ASTBuilder astBuilder = new ASTBuilder(SimpleEvaluator.NAMESPACE_TREEP);
-        Math.addSupportForNumbers(astBuilder);
+        ASTBuilder astBuilder = new ASTBuilder(new SimpleDatumParser(SimpleEvaluator.NAMESPACE_TREEP));
         Object ast = astBuilder.visit(tree);
         Object object = new SimpleEvaluator().apply(ast);
         assertTrue(object instanceof Function);

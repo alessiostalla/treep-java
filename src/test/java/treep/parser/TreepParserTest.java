@@ -18,7 +18,7 @@ public class TreepParserTest {
         assertNotNull(tree);
         assertEquals(0, parser.getNumberOfSyntaxErrors());
         assertEquals(tree.getStart(), tree.getStop());
-        assertEquals(TreepLexer.SYMBOL, tree.getStart().getType());
+        assertEquals(TreepLexer.DATUM, tree.getStart().getType());
     }
 
     @Test
@@ -30,7 +30,7 @@ public class TreepParserTest {
         assertNotNull(tree);
         assertEquals(0, parser.getNumberOfSyntaxErrors());
         assertEquals(tree.getStart(), tree.getStop());
-        assertEquals(TreepLexer.NUMBER, tree.getStart().getType());
+        assertEquals(TreepLexer.DATUM, tree.getStart().getType());
     }
 
     @Test

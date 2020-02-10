@@ -12,14 +12,12 @@ import treep.language.functions.cons;
 import treep.language.operators.quote;
 import treep.language.datatypes.symbol.NameSpace;
 import treep.language.datatypes.symbol.Symbol;
-import treep.language.operators.sequentially;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class SimpleEvaluator extends Function {
 
-    public final Environment initialEnvironment;
     public static final NameSpace NAMESPACE_TREEP = new NameSpace();
 
     //The very base language
@@ -30,47 +28,47 @@ public class SimpleEvaluator extends Function {
     public static final Symbol SYMBOL_HEAD = NAMESPACE_TREEP.intern("head");
     public static final Symbol SYMBOL_EVAL = NAMESPACE_TREEP.intern("eval");
     public static final Symbol SYMBOL_QUOTE = NAMESPACE_TREEP.intern("quote");
-    public static final Symbol SYMBOL_SEQUENTIALLY = NAMESPACE_TREEP.intern("sequentially");
     public static final Symbol SYMBOL_TAIL = NAMESPACE_TREEP.intern("tail");
     public static final Symbol SYMBOL_THE_ENVIRONMENT = NAMESPACE_TREEP.intern("the-environment");
 
-     {
-        Environment environment = Environment.empty();
-        environment = environment.extend(SYMBOL_APPLY, new apply());
-        environment = environment.extend(SYMBOL_CONS, new cons());
-        environment = environment.extend(SYMBOL_FUNCTION, new FunctionOperator(this));
-        environment = environment.extend(SYMBOL_EVAL, this);
-        environment = environment.extend(SYMBOL_HEAD, new head());
-        environment = environment.extend(SYMBOL_QUOTE, new quote());
-        environment = environment.extend(SYMBOL_SEQUENTIALLY, new sequentially(this));
-        environment = environment.extend(SYMBOL_TAIL, new tail());
-        initialEnvironment = environment;
+    public Environment globalEnvironment = Environment.empty();
+    {
+        Environment env = globalEnvironment;
+        env = env.extend(SYMBOL_APPLY, new apply());
+        env = env.extend(SYMBOL_BIND, new bind(this));
+        env = env.extend(SYMBOL_CONS, new cons());
+        env = env.extend(SYMBOL_FUNCTION, new FunctionOperator(this));
+        env = env.extend(SYMBOL_EVAL, this);
+        env = env.extend(SYMBOL_HEAD, new head());
+        env = env.extend(SYMBOL_QUOTE, new quote());
+        env = env.extend(SYMBOL_TAIL, new tail());
+        globalEnvironment = env;
     }
 
     public Object apply(Object expression) {
-        return eval(expression, initialEnvironment);
+        return eval(expression, globalEnvironment);
     }
 
     public Object apply(Object expression, Object environment) {
-         if(!(environment instanceof Environment)) {
-             throw new IllegalArgumentException("Not an environment: " + environment); //TODO
-         }
-         return eval(expression, (Environment) environment);
+        if (!(environment instanceof Environment)) {
+            throw new IllegalArgumentException("Not an environment: " + environment); //TODO
+        }
+        return eval(expression, (Environment) environment);
     }
 
     public Object eval(Object expression, Environment environment) {
-        if(expression instanceof Symbol) {
+        if (expression instanceof Symbol) {
             return eval(new Cons(expression), environment);
-        } else if(expression instanceof Cons) {
+        } else if (expression instanceof Cons) {
             Tree tree = (Cons) expression;
             Object head = tree.getHead();
-            if(head instanceof Symbol) {
+            if (head instanceof Symbol) {
                 return evalApplication((Symbol) head, tree, environment);
-            } else if(head instanceof Function) {
+            } else if (head instanceof Function) {
                 return evalFunctionApplication((Function) head, tree, environment);
-            } else if(head instanceof Operator) {
+            } else if (head instanceof Operator) {
                 return evalOperatorApplication((Operator) head, tree, environment);
-            } else if(tree.getTail() == Nothing.AT_ALL) {
+            } else if (tree.getTail() == Nothing.AT_ALL) {
                 return tree.getHead();
             } else {
                 return new SignalInvalidExpression().apply(expression);
@@ -83,9 +81,9 @@ public class SimpleEvaluator extends Function {
     public Object evalApplication(Symbol head, Tree tree, Environment environment) {
         //TODO document this (Lisp-1)
         Object operator = environment.bindings.get(head);
-        if(operator instanceof Function) {
+        if (operator instanceof Function) {
             return evalFunctionApplication((Function) operator, tree, environment);
-        } else if(operator instanceof Operator) {
+        } else if (operator instanceof Operator) {
             return evalOperatorApplication((Operator) operator, tree, environment);
         } else {
             return new SignalNoSuchOperatorError().apply(head);
@@ -94,7 +92,7 @@ public class SimpleEvaluator extends Function {
 
     public Object evalOperatorApplication(Operator operator, Tree expression, Environment environment) {
         Object result = operator.apply(expression, environment);
-        if(operator instanceof Macro) {
+        if (operator instanceof Macro) {
             return eval(result, environment);
         } else {
             return result;
@@ -104,7 +102,7 @@ public class SimpleEvaluator extends Function {
     public Object evalFunctionApplication(Function function, Tree expression, Environment environment) {
         //TODO optimize for 1, 2, 3 arguments
         List<Object> arguments = new ArrayList<>(2);
-        while(expression.getTail() != Nothing.AT_ALL) {
+        while (expression.getTail() != Nothing.AT_ALL) {
             expression = expression.getTail();
             arguments.add(eval(expression.getHead(), environment));
         }
@@ -144,25 +142,25 @@ public class SimpleEvaluator extends Function {
 
         @Override
         public Object apply(Tree form, Environment environment) {
-            if(form.getTail().getTail() == Nothing.AT_ALL) {
+            if (form.getTail().getTail() == Nothing.AT_ALL) {
                 Object nameOrFunction = form.getTail().getHead();
-                if(nameOrFunction instanceof Function) {
+                if (nameOrFunction instanceof Function) {
                     return nameOrFunction;
                 }
                 Object value = environment.bindings.get(nameOrFunction);
-                if(value instanceof Function) {
+                if (value instanceof Function) {
                     return value;
                 } else {
                     throw new IllegalArgumentException("Not a function: " + nameOrFunction); //TODO
                 }
             } else {
                 Object argumentsList = form.getTail().getHead();
-                if(argumentsList instanceof Tree) {
+                if (argumentsList instanceof Tree) {
                     Tree body = form.getTail().getTail();
-                    if(((Tree) argumentsList).getHead() == Nothing.AT_ALL) {
+                    if (((Tree) argumentsList).getHead() == Nothing.AT_ALL) {
                         //TODO check tail is empty too
                         return new InterpretedFunction0(body, environment, evalutator);
-                    } else if(((Tree) argumentsList).getTail() == Nothing.AT_ALL) {
+                    } else if (((Tree) argumentsList).getTail() == Nothing.AT_ALL) {
                         return new InterpretedFunction1(body, environment, evalutator, (Symbol) ((Tree) argumentsList).getHead()); //TODO check
                     } else { //TODO other cases
                         return new InterpretedFunctionN(body, environment, evalutator, (Cons) argumentsList); //TODO check
@@ -181,7 +179,7 @@ public class SimpleEvaluator extends Function {
 
         public InterpretedFunction(Tree body, Environment environment, Function evaluator) {
             super(environment);
-            this.body = new Cons(SYMBOL_SEQUENTIALLY, body);
+            this.body = new Cons(SYMBOL_BIND, new Cons(Nothing.AT_ALL, body));
             this.evaluator = evaluator;
         }
     }
@@ -223,12 +221,12 @@ public class SimpleEvaluator extends Function {
 
         @Override
         public Object apply(Object... arguments) {
-            if(argumentNames.tailSize() + 1 != arguments.length) { //TODO
+            if (argumentNames.tailSize() + 1 != arguments.length) { //TODO
                 throw new IllegalArgumentException("Invalid arguments"); //TODO
             }
             Environment environment = enclosingEnvironment;
             Tree arg = argumentNames;
-            for(int i = 0; i < arguments.length; i++) {
+            for (int i = 0; i < arguments.length; i++) {
                 environment = environment.extend((Symbol) arg.getHead(), arguments[i]);
                 arg = arg.getTail();
             }
@@ -236,4 +234,32 @@ public class SimpleEvaluator extends Function {
         }
     }
 
+    public static class bind extends Operator {
+        private final SimpleEvaluator simpleEvaluator;
+
+        public bind(SimpleEvaluator simpleEvaluator) {
+            this.simpleEvaluator = simpleEvaluator;
+        }
+
+        @Override
+        public Object apply(Tree form, Environment environment) {
+            Object bindings = form.getTail().getHead();
+            if (!(bindings instanceof Tree)) {
+                throw new IllegalArgumentException("Invalid bindings: " + bindings); //TODO
+            }
+            Tree bindingsTree = (Tree) bindings;
+            while (bindingsTree != Nothing.AT_ALL) {
+                Object binding = bindingsTree.getHead();
+                environment = environment.extend(binding);
+                bindingsTree = bindingsTree.getTail();
+            }
+            Object result = Nothing.AT_ALL;
+            Tree body = form.getTail().getTail();
+            while (body != Nothing.AT_ALL) {
+                result = simpleEvaluator.eval(body.getHead(), environment);
+                body = body.getTail();
+            }
+            return result;
+        }
+    }
 }

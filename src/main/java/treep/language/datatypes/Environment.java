@@ -4,6 +4,8 @@ import org.pcollections.Empty;
 import org.pcollections.PMap;
 import treep.language.Object;
 import treep.language.datatypes.symbol.Symbol;
+import treep.language.datatypes.tree.Cons;
+import treep.language.datatypes.tree.Nothing;
 import treep.language.eval.SimpleEvaluator;
 
 public class Environment extends Object {
@@ -21,6 +23,20 @@ public class Environment extends Object {
             value = new Binding(value);
         }
         return new Environment(bindings.plus(symbol, value));
+    }
+
+    public Environment extend(Object binding) {
+        if(binding instanceof Symbol) {
+            return extend((Symbol) binding, Nothing.AT_ALL);
+        } else if(binding instanceof Cons) {
+            Object name = ((Cons) binding).head;
+            if(!(name instanceof Symbol)) {
+                throw new IllegalArgumentException("Not a symbol: " + name);
+            }
+            return extend((Symbol) name, ((Cons) binding).tail.getHead()); //TODO metadata
+        } else {
+            throw new IllegalArgumentException("Not a binding form: " + binding);
+        }
     }
 
     public static Environment empty() {

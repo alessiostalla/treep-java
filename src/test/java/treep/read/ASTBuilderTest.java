@@ -4,17 +4,18 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.junit.jupiter.api.Test;
 import treep.language.ASTBuilder;
-import treep.math.Math;
-import treep.math.RealNumber;
 import treep.language.Object;
-import treep.parser.TreepLexer;
-import treep.parser.TreepParser;
 import treep.language.datatypes.symbol.NameSpace;
 import treep.language.datatypes.symbol.Symbol;
 import treep.language.datatypes.tree.Cons;
 import treep.language.datatypes.tree.Nothing;
+import treep.language.read.SimpleDatumParser;
+import treep.math.RealNumber;
+import treep.parser.TreepLexer;
+import treep.parser.TreepParser;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ASTBuilderTest {
 
@@ -24,7 +25,7 @@ public class ASTBuilderTest {
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         TreepParser parser = new TreepParser(tokens);
         TreepParser.TreeContext tree = parser.tree();
-        Object ast = new ASTBuilder(new NameSpace()).visit(tree);
+        Object ast = new ASTBuilder(new SimpleDatumParser(new NameSpace())).visit(tree);
         assertTrue(ast instanceof Symbol);
         assertEquals("a", ((Symbol) ast).name);
     }
@@ -35,8 +36,7 @@ public class ASTBuilderTest {
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         TreepParser parser = new TreepParser(tokens);
         TreepParser.TreeContext tree = parser.tree();
-        ASTBuilder astBuilder = new ASTBuilder(new NameSpace());
-        Math.addSupportForNumbers(astBuilder);
+        ASTBuilder astBuilder = new ASTBuilder(new SimpleDatumParser(new NameSpace()));
         Object ast = astBuilder.visit(tree);
         assertTrue(ast instanceof RealNumber);
         assertEquals("1", ((RealNumber) ast).value.toString());
@@ -48,7 +48,7 @@ public class ASTBuilderTest {
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         TreepParser parser = new TreepParser(tokens);
         TreepParser.TopLevelTreeContext tree = parser.topLevelTree();
-        Object ast = new ASTBuilder(new NameSpace()).visit(tree);
+        Object ast = new ASTBuilder(new SimpleDatumParser(new NameSpace())).visit(tree);
         assertEquals(Nothing.AT_ALL, ast);
     }
 
@@ -58,7 +58,7 @@ public class ASTBuilderTest {
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         TreepParser parser = new TreepParser(tokens);
         TreepParser.TopLevelTreeContext tree = parser.topLevelTree();
-        Object ast = new ASTBuilder(new NameSpace()).visit(tree);
+        Object ast = new ASTBuilder(new SimpleDatumParser(new NameSpace())).visit(tree);
         assertTrue(ast instanceof Cons);
         Cons root = (Cons) ast;
         assertTrue(root.head instanceof Symbol);
@@ -75,7 +75,7 @@ public class ASTBuilderTest {
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         TreepParser parser = new TreepParser(tokens);
         TreepParser.TopLevelTreeContext tree = parser.topLevelTree();
-        Object ast = new ASTBuilder(new NameSpace()).visit(tree);
+        Object ast = new ASTBuilder(new SimpleDatumParser(new NameSpace())).visit(tree);
         assertTrue(ast instanceof Cons);
         Cons root = (Cons) ast;
         assertTrue(root.head instanceof Symbol);
@@ -96,7 +96,7 @@ public class ASTBuilderTest {
         TreepParser parser = new TreepParser(tokens);
         TreepParser.TopLevelTreeContext topLevel = parser.topLevelTree();
         TreepParser.TreeContext tree = topLevel.tree();
-        Object ast = new ASTBuilder(new NameSpace()).visit(tree);
+        Object ast = new ASTBuilder(new SimpleDatumParser(new NameSpace())).visit(tree);
         assertTrue(ast instanceof Symbol);
         assertEquals("a", ((Symbol) ast).name);
     }

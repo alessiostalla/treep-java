@@ -22,3 +22,7 @@ These are the key concepts of Treep:
 * Rich compiler API: the compiler is a service that can be invoked and it has hooks for user-defined transformations
   and optimizations
 * Sensible and useful scoping, namespacing and modularization. Too many languages get these wrong!
+* Immutability by default
+  * Bindings are pure functions
+  * Mutable bindings are modeled with places/refs
+  * Conses are immutable (but can contain places/refs)

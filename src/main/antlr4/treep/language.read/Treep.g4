@@ -1,4 +1,4 @@
-grammar Tree;
+grammar Treep;
 
 @header {
     import java.util.*;
@@ -44,7 +44,7 @@ grammar Tree;
     }
 }
 
-topLevelTree: INDENT* (INDENT{pushIndentation();})? tree{resetIndentation();};
+topLevelTree: (INDENT* INDENT{pushIndentation();})? tree{resetIndentation();};
 
 tree:
   node node*
@@ -52,7 +52,10 @@ tree:
 
 list: LPAREN (node | INDENT)* RPAREN; //TODO use modes to remove indent token?
 
+node: DATUM | list;
+
 LPAREN: '(';
 RPAREN: ')';
 INDENT: ('\r'? '\n' | '\r') (' ' | '\t')*;
+DATUM: (~(' ' | '\t' | '\r' | '\n' | '(' | ')'))+; //TODO escaping (using modes?)
 WS: (' ' | '\t') -> skip; //TODO redirect to another channel?

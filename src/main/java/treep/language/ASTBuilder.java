@@ -5,22 +5,19 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.pcollections.Empty;
 import org.pcollections.PStack;
-import treep.language.datatypes.symbol.Symbol;
 import treep.language.datatypes.tree.Cons;
 import treep.language.datatypes.tree.Nothing;
 import treep.language.datatypes.tree.Tree;
+import treep.language.read.DatumParser;
 import treep.parser.TreepBaseVisitor;
 import treep.parser.TreepParser;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class ASTBuilder extends TreepBaseVisitor<Object> {
 
-    protected final Map<Integer, ObjectFactory> objectFactoryMap = new HashMap<>();
+    protected final DatumParser datumParser;
 
-    public ASTBuilder(ObjectFactory<Symbol> symbolResolutionStrategy) {
-        setSymbolResolutionStrategy(symbolResolutionStrategy);
+    public ASTBuilder(DatumParser datumParser) {
+        this.datumParser = datumParser;
     }
 
     @Override
@@ -61,34 +58,9 @@ public class ASTBuilder extends TreepBaseVisitor<Object> {
     }
 
     @Override
-    public Object visitNode(TreepParser.NodeContext ctx) {
-        if(ctx.atom != null) {
-            return visitToken(ctx.atom);
-        } else {
-            return visit(ctx.list());
-        }
-    }
-
-    @Override
     public Object visitTerminal(TerminalNode node) {
         Token token = node.getSymbol();
-        return visitToken(token);
+        return datumParser.parse(token.getText());
     }
 
-    protected Object visitToken(Token token) {
-        ObjectFactory<?> objectFactory = objectFactoryMap.get(token.getType());
-        if(objectFactory != null) {
-            return objectFactory.get(token.getText());
-        } else {
-            throw new IllegalArgumentException("Unsupported token: " + token);
-        }
-    }
-
-    public Map<Integer, ObjectFactory> getObjectFactoryMap() {
-        return objectFactoryMap;
-    }
-
-    public void setSymbolResolutionStrategy(ObjectFactory<Symbol> strategy) {
-        objectFactoryMap.put(TreepParser.SYMBOL, strategy);
-    }
 }
