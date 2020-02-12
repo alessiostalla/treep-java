@@ -1,16 +1,15 @@
-package treep.language;
+package treep.language.read;
 
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.pcollections.Empty;
 import org.pcollections.PStack;
+import treep.language.Object;
+import treep.language.Symbols;
 import treep.language.datatypes.tree.Cons;
 import treep.language.datatypes.tree.Nothing;
 import treep.language.datatypes.tree.Tree;
-import treep.language.read.DatumParser;
-import treep.parser.TreepBaseVisitor;
-import treep.parser.TreepParser;
 
 public class ASTBuilder extends TreepBaseVisitor<Object> {
 
@@ -41,6 +40,9 @@ public class ASTBuilder extends TreepBaseVisitor<Object> {
         for(Object child : children) {
             tree = new Cons(child, tree);
         }
+        if(ctx.QUOTE() != null) {
+            tree = new Cons(Symbols.SYMBOL_QUOTE, new Cons((Object) tree));
+        }
         return (Object) tree;
     }
 
@@ -55,6 +57,16 @@ public class ASTBuilder extends TreepBaseVisitor<Object> {
             list = new Cons(child, list);
         }
         return (Object) list;
+    }
+
+    @Override
+    public Object visitNode(TreepParser.NodeContext ctx) {
+        Object object = super.visitNode(ctx);
+        if(ctx.QUOTE() != null) {
+            return new Cons(Symbols.SYMBOL_QUOTE, object);
+        } else {
+            return object;
+        }
     }
 
     @Override

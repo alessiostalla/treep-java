@@ -1,5 +1,6 @@
 package treep.language.eval;
 
+import treep.language.Symbols;
 import treep.language.datatypes.*;
 import treep.language.Object;
 import treep.language.datatypes.tree.Cons;
@@ -10,7 +11,6 @@ import treep.language.functions.head;
 import treep.language.functions.tail;
 import treep.language.functions.cons;
 import treep.language.operators.quote;
-import treep.language.datatypes.symbol.NameSpace;
 import treep.language.datatypes.symbol.Symbol;
 
 import java.util.ArrayList;
@@ -18,30 +18,17 @@ import java.util.List;
 
 public class SimpleEvaluator extends Function {
 
-    public static final NameSpace NAMESPACE_TREEP = new NameSpace();
-
-    //The very base language
-    public static final Symbol SYMBOL_APPLY = NAMESPACE_TREEP.intern("apply");
-    public static final Symbol SYMBOL_BIND = NAMESPACE_TREEP.intern("bind");
-    public static final Symbol SYMBOL_CONS = NAMESPACE_TREEP.intern("cons");
-    public static final Symbol SYMBOL_FUNCTION = NAMESPACE_TREEP.intern("function");
-    public static final Symbol SYMBOL_HEAD = NAMESPACE_TREEP.intern("head");
-    public static final Symbol SYMBOL_EVAL = NAMESPACE_TREEP.intern("eval");
-    public static final Symbol SYMBOL_QUOTE = NAMESPACE_TREEP.intern("quote");
-    public static final Symbol SYMBOL_TAIL = NAMESPACE_TREEP.intern("tail");
-    public static final Symbol SYMBOL_THE_ENVIRONMENT = NAMESPACE_TREEP.intern("the-environment");
-
     public Environment globalEnvironment = Environment.empty();
     {
         Environment env = globalEnvironment;
-        env = env.extend(SYMBOL_APPLY, new apply());
-        env = env.extend(SYMBOL_BIND, new bind(this));
-        env = env.extend(SYMBOL_CONS, new cons());
-        env = env.extend(SYMBOL_FUNCTION, new FunctionOperator(this));
-        env = env.extend(SYMBOL_EVAL, this);
-        env = env.extend(SYMBOL_HEAD, new head());
-        env = env.extend(SYMBOL_QUOTE, new quote());
-        env = env.extend(SYMBOL_TAIL, new tail());
+        env = env.extend(Symbols.SYMBOL_APPLY, new apply());
+        env = env.extend(Symbols.SYMBOL_BIND, new bind(this));
+        env = env.extend(Symbols.SYMBOL_CONS, new cons());
+        env = env.extend(Symbols.SYMBOL_FUNCTION, new FunctionOperator(this));
+        env = env.extend(Symbols.SYMBOL_EVAL, this);
+        env = env.extend(Symbols.SYMBOL_HEAD, new head());
+        env = env.extend(Symbols.SYMBOL_QUOTE, new quote());
+        env = env.extend(Symbols.SYMBOL_TAIL, new tail());
         globalEnvironment = env;
     }
 
@@ -179,7 +166,7 @@ public class SimpleEvaluator extends Function {
 
         public InterpretedFunction(Tree body, Environment environment, Function evaluator) {
             super(environment);
-            this.body = new Cons(SYMBOL_BIND, new Cons(Nothing.AT_ALL, body));
+            this.body = new Cons(Symbols.SYMBOL_BIND, new Cons(Nothing.AT_ALL, body));
             this.evaluator = evaluator;
         }
     }
@@ -235,14 +222,15 @@ public class SimpleEvaluator extends Function {
     }
 
     public static class bind extends Operator {
-        private final SimpleEvaluator simpleEvaluator;
+        private final SimpleEvaluator evaluator;
 
-        public bind(SimpleEvaluator simpleEvaluator) {
-            this.simpleEvaluator = simpleEvaluator;
+        public bind(SimpleEvaluator evaluator) {
+            this.evaluator = evaluator;
         }
 
         @Override
         public Object apply(Tree form, Environment environment) {
+            Environment original = environment;
             Object bindings = form.getTail().getHead();
             if (!(bindings instanceof Tree)) {
                 throw new IllegalArgumentException("Invalid bindings: " + bindings); //TODO
@@ -250,13 +238,17 @@ public class SimpleEvaluator extends Function {
             Tree bindingsTree = (Tree) bindings;
             while (bindingsTree != Nothing.AT_ALL) {
                 Object binding = bindingsTree.getHead();
+                if(binding instanceof Cons) {
+                    Object value = evaluator.eval(((Cons) binding).tail.getHead(), original);
+                    binding = new Cons(((Cons) binding).head, new Cons(value));
+                }
                 environment = environment.extend(binding);
                 bindingsTree = bindingsTree.getTail();
             }
             Object result = Nothing.AT_ALL;
             Tree body = form.getTail().getTail();
             while (body != Nothing.AT_ALL) {
-                result = simpleEvaluator.eval(body.getHead(), environment);
+                result = evaluator.eval(body.getHead(), environment);
                 body = body.getTail();
             }
             return result;

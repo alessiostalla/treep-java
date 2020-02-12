@@ -12,7 +12,7 @@ public class cons extends Function {
         if(tail instanceof Tree) {
             return new Cons(head, (Tree) tail);
         } else {
-            throw new IllegalArgumentException("Not a tree: " + tail); //TODO
+            return new Cons(head, new Cons(tail));
         }
     }
 

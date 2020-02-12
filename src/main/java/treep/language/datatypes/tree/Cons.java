@@ -11,10 +11,25 @@ public class Cons extends Object implements Tree {
         this(head, Nothing.AT_ALL);
     }
 
-    public Cons(Object head, Tree tail) {
+    public Cons(Object head, Object tail) {
         if(head == null) {
             throw new IllegalArgumentException("Head cannot be null");
         }
+        this.head = head;
+        this.tail = tail instanceof Tree ? (Tree) tail : new Cons(tail);
+    }
+
+    public Cons(Object head, Tree tail) {
+        this.head = head;
+        this.tail = tail;
+    }
+
+    public Cons(Object head, Nothing tail) {
+        this.head = head;
+        this.tail = tail;
+    }
+
+    public Cons(Object head, Cons tail) {
         this.head = head;
         this.tail = tail;
     }

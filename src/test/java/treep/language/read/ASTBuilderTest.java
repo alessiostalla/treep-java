@@ -1,18 +1,14 @@
-package treep.read;
+package treep.language.read;
 
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.junit.jupiter.api.Test;
-import treep.language.ASTBuilder;
 import treep.language.Object;
 import treep.language.datatypes.symbol.NameSpace;
 import treep.language.datatypes.symbol.Symbol;
 import treep.language.datatypes.tree.Cons;
 import treep.language.datatypes.tree.Nothing;
-import treep.language.read.SimpleDatumParser;
 import treep.math.RealNumber;
-import treep.parser.TreepLexer;
-import treep.parser.TreepParser;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;

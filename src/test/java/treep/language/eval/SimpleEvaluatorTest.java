@@ -3,15 +3,18 @@ package treep.language.eval;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.junit.jupiter.api.Test;
+import treep.language.Symbols;
 import treep.language.datatypes.Environment;
 import treep.language.datatypes.Function;
 import treep.language.Object;
-import treep.language.ASTBuilder;
+import treep.language.datatypes.tree.Nothing;
+import treep.language.read.ASTBuilder;
 import treep.language.datatypes.tree.Cons;
 import treep.language.read.SimpleDatumParser;
+import treep.language.read.TreepLexer;
+import treep.language.read.TreepParser;
 import treep.math.RealNumber;
-import treep.parser.TreepLexer;
-import treep.parser.TreepParser;
+
 import treep.language.datatypes.symbol.Symbol;
 
 import java.math.BigDecimal;
@@ -26,7 +29,7 @@ public class SimpleEvaluatorTest {
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         TreepParser parser = new TreepParser(tokens);
         TreepParser.TreeContext tree = parser.tree();
-        ASTBuilder astBuilder = new ASTBuilder(new SimpleDatumParser(SimpleEvaluator.NAMESPACE_TREEP));
+        ASTBuilder astBuilder = new ASTBuilder(new SimpleDatumParser(Symbols.NAMESPACE_TREEP));
         Object ast = astBuilder.visit(tree);
         try {
             new SimpleEvaluator().apply(ast);
@@ -35,7 +38,7 @@ public class SimpleEvaluatorTest {
             //Ok
         }
         RealNumber value = new RealNumber(new BigDecimal("1"));
-        Symbol a = SimpleEvaluator.NAMESPACE_TREEP.intern("a");
+        Symbol a = Symbols.NAMESPACE_TREEP.intern("a");
         assertEquals(value, new SimpleEvaluator().eval(ast, Environment.empty().extend(a, value)));
     }
 
@@ -45,7 +48,7 @@ public class SimpleEvaluatorTest {
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         TreepParser parser = new TreepParser(tokens);
         TreepParser.TreeContext tree = parser.tree();
-        ASTBuilder astBuilder = new ASTBuilder(new SimpleDatumParser(SimpleEvaluator.NAMESPACE_TREEP));
+        ASTBuilder astBuilder = new ASTBuilder(new SimpleDatumParser(Symbols.NAMESPACE_TREEP));
         Object ast = astBuilder.visit(tree);
         Object result = new SimpleEvaluator().apply(ast);
         assertTrue(result instanceof RealNumber);
@@ -58,7 +61,7 @@ public class SimpleEvaluatorTest {
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         TreepParser parser = new TreepParser(tokens);
         TreepParser.TreeContext tree = parser.tree();
-        ASTBuilder astBuilder = new ASTBuilder(new SimpleDatumParser(SimpleEvaluator.NAMESPACE_TREEP));
+        ASTBuilder astBuilder = new ASTBuilder(new SimpleDatumParser(Symbols.NAMESPACE_TREEP));
         Object ast = astBuilder.visit(tree);
         assertTrue(ast instanceof Cons);
         try {
@@ -68,7 +71,7 @@ public class SimpleEvaluatorTest {
             //Ok
         }
 
-        Symbol a = SimpleEvaluator.NAMESPACE_TREEP.intern("a");
+        Symbol a = Symbols.NAMESPACE_TREEP.intern("a");
         Environment withFunction = Environment.empty().extend(a, new Function() {
             @Override
             public Object apply(Object... arguments) {
@@ -82,7 +85,7 @@ public class SimpleEvaluatorTest {
             //Ok
         }
 
-        Symbol b = SimpleEvaluator.NAMESPACE_TREEP.intern("b");
+        Symbol b = Symbols.NAMESPACE_TREEP.intern("b");
         RealNumber value = new RealNumber(new BigDecimal("1"));
         Environment withValue = withFunction.extend(b, value);
 
@@ -95,13 +98,42 @@ public class SimpleEvaluatorTest {
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         TreepParser parser = new TreepParser(tokens);
         TreepParser.TopLevelTreeContext tree = parser.topLevelTree();
-        ASTBuilder astBuilder = new ASTBuilder(new SimpleDatumParser(SimpleEvaluator.NAMESPACE_TREEP));
+        ASTBuilder astBuilder = new ASTBuilder(new SimpleDatumParser(Symbols.NAMESPACE_TREEP));
         Object ast = astBuilder.visit(tree);
         Object object = new SimpleEvaluator().apply(ast);
         assertTrue(object instanceof Cons);
-        assertEquals(SimpleEvaluator.NAMESPACE_TREEP.intern("a"), ((Cons) object).head);
-        assertEquals(SimpleEvaluator.NAMESPACE_TREEP.intern("b"), ((Cons) object).tail.getHead());
+        assertEquals(Symbols.NAMESPACE_TREEP.intern("a"), ((Cons) object).head);
+        assertEquals(Symbols.NAMESPACE_TREEP.intern("b"), ((Cons) object).tail.getHead());
     }
+
+    @Test
+    public void quoteAbbreviated() {
+        TreepLexer lexer = new TreepLexer(CharStreams.fromString("'a\n\tb"));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        TreepParser parser = new TreepParser(tokens);
+        TreepParser.TopLevelTreeContext tree = parser.topLevelTree();
+        ASTBuilder astBuilder = new ASTBuilder(new SimpleDatumParser(Symbols.NAMESPACE_TREEP));
+        Object ast = astBuilder.visit(tree);
+        Object object = new SimpleEvaluator().apply(ast);
+        assertTrue(object instanceof Cons);
+        assertEquals(Symbols.NAMESPACE_TREEP.intern("a"), ((Cons) object).head);
+        assertEquals(Symbols.NAMESPACE_TREEP.intern("b"), ((Cons) object).tail.getHead());
+    }
+
+    @Test
+    public void cons() {
+        TreepLexer lexer = new TreepLexer(CharStreams.fromString("cons 'a 'b"));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        TreepParser parser = new TreepParser(tokens);
+        TreepParser.TopLevelTreeContext tree = parser.topLevelTree();
+        ASTBuilder astBuilder = new ASTBuilder(new SimpleDatumParser(Symbols.NAMESPACE_TREEP));
+        Object ast = astBuilder.visit(tree);
+        Object object = new SimpleEvaluator().apply(ast);
+        assertTrue(object instanceof Cons);
+        assertEquals(Symbols.NAMESPACE_TREEP.intern("a"), ((Cons) object).head);
+        assertEquals(Symbols.NAMESPACE_TREEP.intern("b"), ((Cons) object).tail.getHead());
+    }
+
 
     @Test
     public void function0() {
@@ -109,13 +141,67 @@ public class SimpleEvaluatorTest {
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         TreepParser parser = new TreepParser(tokens);
         TreepParser.TreeContext tree = parser.tree();
-        ASTBuilder astBuilder = new ASTBuilder(new SimpleDatumParser(SimpleEvaluator.NAMESPACE_TREEP));
+        ASTBuilder astBuilder = new ASTBuilder(new SimpleDatumParser(Symbols.NAMESPACE_TREEP));
         Object ast = astBuilder.visit(tree);
         Object object = new SimpleEvaluator().apply(ast);
         assertTrue(object instanceof Function);
         Object result = ((Function) object).apply();
         assertTrue(result instanceof RealNumber);
         assertEquals(new BigDecimal("3"), ((RealNumber) result).value);
+    }
+
+    @Test
+    public void function1() {
+        TreepLexer lexer = new TreepLexer(CharStreams.fromString("function (x) x"));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        TreepParser parser = new TreepParser(tokens);
+        TreepParser.TreeContext tree = parser.tree();
+        ASTBuilder astBuilder = new ASTBuilder(new SimpleDatumParser(Symbols.NAMESPACE_TREEP));
+        Object ast = astBuilder.visit(tree);
+        Object object = new SimpleEvaluator().apply(ast);
+        assertTrue(object instanceof Function);
+        Object result = ((Function) object).apply(new RealNumber(new BigDecimal("3")));
+        assertTrue(result instanceof RealNumber);
+        assertEquals(new BigDecimal("3"), ((RealNumber) result).value);
+    }
+
+    @Test
+    public void bindEmpty() {
+        TreepLexer lexer = new TreepLexer(CharStreams.fromString("bind (x)\n\tx"));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        TreepParser parser = new TreepParser(tokens);
+        TreepParser.TreeContext tree = parser.tree();
+        ASTBuilder astBuilder = new ASTBuilder(new SimpleDatumParser(Symbols.NAMESPACE_TREEP));
+        Object ast = astBuilder.visit(tree);
+        Object object = new SimpleEvaluator().apply(ast);
+        assertEquals(Nothing.AT_ALL, object);
+    }
+
+    @Test
+    public void bindValue() {
+        TreepLexer lexer = new TreepLexer(CharStreams.fromString("bind ((x 3))\n\tx"));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        TreepParser parser = new TreepParser(tokens);
+        TreepParser.TreeContext tree = parser.tree();
+        ASTBuilder astBuilder = new ASTBuilder(new SimpleDatumParser(Symbols.NAMESPACE_TREEP));
+        Object ast = astBuilder.visit(tree);
+        Object object = new SimpleEvaluator().apply(ast);
+        assertTrue(object instanceof RealNumber);
+        assertEquals(new BigDecimal("3"), ((RealNumber) object).value);
+    }
+
+    @Test
+    public void bindValues() {
+        TreepLexer lexer = new TreepLexer(CharStreams.fromString("bind ((x 'a) (y 'b))\n\tcons x y"));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        TreepParser parser = new TreepParser(tokens);
+        TreepParser.TreeContext tree = parser.tree();
+        ASTBuilder astBuilder = new ASTBuilder(new SimpleDatumParser(Symbols.NAMESPACE_TREEP));
+        Object ast = astBuilder.visit(tree);
+        Object object = new SimpleEvaluator().apply(ast);
+        assertTrue(object instanceof Cons);
+        assertEquals(Symbols.NAMESPACE_TREEP.intern("a"), ((Cons) object).head);
+        assertEquals(Symbols.NAMESPACE_TREEP.intern("b"), ((Cons) object).tail.getHead());
     }
 
 }

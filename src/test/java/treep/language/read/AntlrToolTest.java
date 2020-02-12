@@ -1,4 +1,4 @@
-package treep.parser;
+package treep.language.read;
 
 import org.antlr.v4.Tool;
 import org.antlr.v4.tool.Grammar;

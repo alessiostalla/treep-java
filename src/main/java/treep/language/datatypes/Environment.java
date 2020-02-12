@@ -3,16 +3,16 @@ package treep.language.datatypes;
 import org.pcollections.Empty;
 import org.pcollections.PMap;
 import treep.language.Object;
+import treep.language.Symbols;
 import treep.language.datatypes.symbol.Symbol;
 import treep.language.datatypes.tree.Cons;
 import treep.language.datatypes.tree.Nothing;
-import treep.language.eval.SimpleEvaluator;
 
 public class Environment extends Object {
 
     public final PMap<Symbol, Object> bindings;
     public final PMap<Symbol, Object> defaultBindings = Empty.<Symbol, Object>map().plus(
-            SimpleEvaluator.SYMBOL_THE_ENVIRONMENT, new Binding(this));
+            Symbols.SYMBOL_THE_ENVIRONMENT, new Binding(this));
 
     protected Environment(PMap<Symbol, Object> bindings) {
         this.bindings = defaultBindings.plusAll(bindings);
