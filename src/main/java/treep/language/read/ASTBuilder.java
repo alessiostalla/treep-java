@@ -41,7 +41,7 @@ public class ASTBuilder extends TreepBaseVisitor<Object> {
             tree = new Cons(child, tree);
         }
         if(ctx.QUOTE() != null) {
-            tree = new Cons(Symbols.SYMBOL_QUOTE, new Cons((Object) tree));
+            tree = new Cons(Symbols.QUOTE, new Cons((Object) tree));
         }
         return (Object) tree;
     }
@@ -63,7 +63,7 @@ public class ASTBuilder extends TreepBaseVisitor<Object> {
     public Object visitNode(TreepParser.NodeContext ctx) {
         Object object = super.visitNode(ctx);
         if(ctx.QUOTE() != null) {
-            return new Cons(Symbols.SYMBOL_QUOTE, object);
+            return new Cons(Symbols.QUOTE, object);
         } else {
             return object;
         }
