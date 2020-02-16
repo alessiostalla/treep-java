@@ -13,6 +13,9 @@ public class Symbols {
     public static final Symbol FUNCTION = NAMESPACE_TREEP.intern("function");
     public static final Symbol HEAD = NAMESPACE_TREEP.intern("head");
     public static final Symbol MACRO = NAMESPACE_TREEP.intern("macro");
+    public static final Symbol MACRO_BODY = NAMESPACE_TREEP.intern("macro:body");
+    public static final Symbol MACRO_ENVIRONMENT = NAMESPACE_TREEP.intern("macro:environment");
+    public static final Symbol MACRO_FORM = NAMESPACE_TREEP.intern("macro:form");
     public static final Symbol NIL = NAMESPACE_TREEP.intern("nil");
     public static final Symbol QUOTE = NAMESPACE_TREEP.intern("quote");
     public static final Symbol TAIL = NAMESPACE_TREEP.intern("tail");

@@ -72,7 +72,7 @@ public class SimpleEvaluatorTest {
         }
 
         Symbol a = Symbols.NAMESPACE_TREEP.intern("a");
-        Environment withFunction = Environment.empty().extendWithFunction(a, new Function() {
+        Environment withFunction = Environment.empty().extendWithFunction(a, new Function(Nothing.AT_ALL) {
             @Override
             public Object apply(Object... arguments) {
                 return arguments[0];
@@ -231,6 +231,25 @@ public class SimpleEvaluatorTest {
         } catch (Exception e) {
             //Ok
         }
+    }
+
+    @Test
+    public void bindMacro() {
+        TreepLexer lexer = new TreepLexer(CharStreams.fromString("bind ((macro m (x macro:body) (cons 'cons (cons macro:body (cons x)))))\n\tm 4 cons 3"));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        TreepParser parser = new TreepParser(tokens);
+        TreepParser.TreeContext tree = parser.tree();
+        ASTBuilder astBuilder = new ASTBuilder(new SimpleDatumParser(Symbols.NAMESPACE_TREEP));
+        Object ast = astBuilder.visit(tree);
+        Object object = new SimpleEvaluator().apply(ast);
+        assertTrue(object instanceof Cons);
+        Object head = ((Cons) object).head;
+        assertTrue(head instanceof Cons);
+        head = ((Cons) object).head;
+        assertTrue(head instanceof Cons);
+        head = ((Cons) head).getHead();
+        assertTrue(head instanceof RealNumber);
+        assertEquals(new BigDecimal("3"), ((RealNumber) head).value);
     }
 
 }

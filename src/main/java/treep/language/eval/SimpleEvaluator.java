@@ -33,6 +33,10 @@ public class SimpleEvaluator extends Function {
         globalEnvironment = env;
     }
 
+    public SimpleEvaluator() {
+        super(new Cons(Nothing.AT_ALL, new Cons(Nothing.AT_ALL))); //TODO arg names? Optional args?
+    }
+
     public Object apply(Object expression) {
         return eval(expression, globalEnvironment);
     }
@@ -80,7 +84,7 @@ public class SimpleEvaluator extends Function {
 
     public Object evalOperatorApplication(Operator operator, Tree expression, Environment environment) {
         Object result = operator.apply(expression, environment);
-        if (operator instanceof Macro) {
+        if (operator instanceof Macro) { //TODO if result == expression, what happens?
             return eval(result, environment);
         } else {
             return result;
@@ -110,24 +114,29 @@ public class SimpleEvaluator extends Function {
                 throw new IllegalArgumentException("Not a function: " + nameOrFunction); //TODO
             }
         } else {
-            Object argumentsList = definition.getHead();
-            if (argumentsList instanceof Tree) {
+            Object arglist = definition.getHead();
+            if (arglist instanceof Tree) {
                 Tree body = definition.getTail();
-                if (((Tree) argumentsList).getHead() == Nothing.AT_ALL) {
+                Tree args = (Tree) arglist;
+                if (args.getHead() == Nothing.AT_ALL) {
                     //TODO check tail is empty too
-                    return new InterpretedFunction0(body, environment, this);
-                } else if (((Tree) argumentsList).getTail() == Nothing.AT_ALL) {
-                    return new InterpretedFunction1(body, environment, this, (Symbol) ((Tree) argumentsList).getHead()); //TODO check
+                    return new InterpretedFunction0(args, body, environment, this);
+                } else if (args.getTail() == Nothing.AT_ALL) {
+                    return new InterpretedFunction1(args, body, environment, this, (Symbol) args.getHead()); //TODO check
                 } else { //TODO other cases
-                    return new InterpretedFunctionN(body, environment, this, (Cons) argumentsList); //TODO check
+                    return new InterpretedFunctionN(args, body, environment, this, (Cons) arglist); //TODO check
                 }
             } else {
-                throw new IllegalArgumentException("Not an arguments list: " + argumentsList); //TODO
+                throw new IllegalArgumentException("Not an arguments list: " + arglist); //TODO
             }
         }
     }
 
     public static class SignalNoSuchOperatorError extends Function {
+
+        public SignalNoSuchOperatorError() {
+            super(new Cons(Symbols.NIL));
+        }
 
         @Override
         public Object apply(Object argument) {
@@ -141,6 +150,10 @@ public class SimpleEvaluator extends Function {
     }
 
     public static class SignalInvalidExpression extends Function {
+
+        public SignalInvalidExpression() {
+            super(new Cons(Symbols.NIL));
+        }
 
         @Override
         public Object apply(Object argument) {
@@ -163,16 +176,16 @@ public class SimpleEvaluator extends Function {
         public final Object body;
         public final Function evaluator;
 
-        public InterpretedFunction(Tree body, Environment environment, Function evaluator) {
-            super(environment);
+        public InterpretedFunction(Tree arglist, Tree body, Environment environment, Function evaluator) {
+            super(arglist, environment);
             this.body = new Cons(Symbols.BIND, new Cons(Nothing.AT_ALL, body));
             this.evaluator = evaluator;
         }
     }
 
     public static class InterpretedFunction0 extends InterpretedFunction {
-        public InterpretedFunction0(Tree body, Environment environment, Function evaluator) {
-            super(body, environment, evaluator);
+        public InterpretedFunction0(Tree arglist, Tree body, Environment environment, Function evaluator) {
+            super(arglist, body, environment, evaluator);
         }
 
         @Override
@@ -185,8 +198,8 @@ public class SimpleEvaluator extends Function {
 
         public final Symbol argumentName;
 
-        public InterpretedFunction1(Tree body, Environment environment, Function evaluator, Symbol argumentName) {
-            super(body, environment, evaluator);
+        public InterpretedFunction1(Tree arglist, Tree body, Environment environment, Function evaluator, Symbol argumentName) {
+            super(arglist, body, environment, evaluator);
             this.argumentName = argumentName;
         }
 
@@ -200,8 +213,8 @@ public class SimpleEvaluator extends Function {
 
         public final Cons argumentNames;
 
-        public InterpretedFunctionN(Tree body, Environment environment, Function evaluator, Cons argumentNames) {
-            super(body, environment, evaluator);
+        public InterpretedFunctionN(Tree arglist, Tree body, Environment environment, Function evaluator, Cons argumentNames) {
+            super(arglist, body, environment, evaluator);
             this.argumentNames = argumentNames;  //TODO check they are all symbols
         }
 
@@ -252,7 +265,6 @@ public class SimpleEvaluator extends Function {
                         }
                         Tree definition = theBinding.tail.getTail();
                         Function function = makeFunction(definition, environment);
-                        //TODO who does the destructuring?
                         environment = environment.extendWithOperator((Symbol) name, new Macro(function));
                     } else {
                         Object value = eval(theBinding.tail.getHead(), original);

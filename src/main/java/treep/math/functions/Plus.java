@@ -2,9 +2,15 @@ package treep.math.functions;
 
 import treep.language.Object;
 import treep.language.datatypes.Function;
+import treep.language.datatypes.tree.Cons;
+import treep.language.datatypes.tree.Nothing;
 import treep.math.RealNumber;
 
 public class Plus extends Function {
+
+    public Plus() {
+        super(new Cons(Nothing.AT_ALL)); //TODO
+    }
 
     @Override
     public RealNumber apply(Object... arguments) {

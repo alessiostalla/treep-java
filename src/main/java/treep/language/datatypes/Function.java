@@ -1,8 +1,15 @@
 package treep.language.datatypes;
 
 import treep.language.Object;
+import treep.language.datatypes.tree.Tree;
 
 public abstract class Function extends Object {
+
+    public final Tree arglist;
+
+    protected Function(Tree arglist) {
+        this.arglist = arglist;
+    }
 
     public Object apply(Object... arguments) {
         if(arguments.length == 0) {
