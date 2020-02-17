@@ -12,12 +12,15 @@ public class Symbols {
     public static final Symbol EVAL = NAMESPACE_TREEP.intern("eval");
     public static final Symbol FUNCTION = NAMESPACE_TREEP.intern("function");
     public static final Symbol HEAD = NAMESPACE_TREEP.intern("head");
+    public static final Symbol IF = NAMESPACE_TREEP.intern("if");
+    public static final Symbol LOOP = NAMESPACE_TREEP.intern("loop");
     public static final Symbol MACRO = NAMESPACE_TREEP.intern("macro");
     public static final Symbol MACRO_BODY = NAMESPACE_TREEP.intern("macro:body");
     public static final Symbol MACRO_ENVIRONMENT = NAMESPACE_TREEP.intern("macro:environment");
     public static final Symbol MACRO_FORM = NAMESPACE_TREEP.intern("macro:form");
     public static final Symbol NIL = NAMESPACE_TREEP.intern("nil");
     public static final Symbol QUOTE = NAMESPACE_TREEP.intern("quote");
+    public static final Symbol RETURN = NAMESPACE_TREEP.intern("return");
     public static final Symbol TAIL = NAMESPACE_TREEP.intern("tail");
     public static final Symbol THE_ENVIRONMENT = NAMESPACE_TREEP.intern("the-environment");
 }

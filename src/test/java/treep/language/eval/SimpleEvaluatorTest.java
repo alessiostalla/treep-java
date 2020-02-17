@@ -252,4 +252,30 @@ public class SimpleEvaluatorTest {
         assertEquals(new BigDecimal("3"), ((RealNumber) head).value);
     }
 
+    @Test
+    public void ifTrue() {
+        TreepLexer lexer = new TreepLexer(CharStreams.fromString("if 1 2 3"));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        TreepParser parser = new TreepParser(tokens);
+        TreepParser.TreeContext tree = parser.tree();
+        ASTBuilder astBuilder = new ASTBuilder(new SimpleDatumParser(Symbols.NAMESPACE_TREEP));
+        Object ast = astBuilder.visit(tree);
+        Object object = new SimpleEvaluator().apply(ast);
+        assertTrue(object instanceof RealNumber);
+        assertEquals(new BigDecimal("2"), ((RealNumber) object).value);
+    }
+
+    @Test
+    public void ifFalse() {
+        TreepLexer lexer = new TreepLexer(CharStreams.fromString("if nil 1 2"));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        TreepParser parser = new TreepParser(tokens);
+        TreepParser.TreeContext tree = parser.tree();
+        ASTBuilder astBuilder = new ASTBuilder(new SimpleDatumParser(Symbols.NAMESPACE_TREEP));
+        Object ast = astBuilder.visit(tree);
+        Object object = new SimpleEvaluator().apply(ast);
+        assertTrue(object instanceof RealNumber);
+        assertEquals(new BigDecimal("2"), ((RealNumber) object).value);
+    }
+
 }

@@ -24,10 +24,12 @@ public class SimpleEvaluator extends Function {
         env = env.extendWithFunction(Symbols.APPLY, new apply());
         env = env.extendWithOperator(Symbols.BIND, new bind());
         env = env.extendWithFunction(Symbols.CONS, new cons());
-        env = env.extendWithOperator(Symbols.FUNCTION, new FunctionOperator());
         env = env.extendWithFunction(Symbols.EVAL, this);
+        env = env.extendWithOperator(Symbols.FUNCTION, new function());
         env = env.extendWithFunction(Symbols.HEAD, new head());
+        env = env.extendWithOperator(Symbols.IF, new ifOperator());
         env = env.extendWithValue(Symbols.NIL, Nothing.AT_ALL);
+        env = env.extendWithOperator(Symbols.RETURN, new returnOperator());
         env = env.extendWithOperator(Symbols.QUOTE, new quote());
         env = env.extendWithFunction(Symbols.TAIL, new tail());
         globalEnvironment = env;
@@ -162,7 +164,7 @@ public class SimpleEvaluator extends Function {
 
     }
 
-    public class FunctionOperator extends Operator {
+    public class function extends Operator {
 
         @Override
         public Object apply(Tree form, Environment environment) {
@@ -282,6 +284,43 @@ public class SimpleEvaluator extends Function {
                 body = body.getTail();
             }
             return result;
+        }
+    }
+
+    public class ifOperator extends Operator {
+
+        @Override
+        public Object apply(Tree form, Environment environment) {
+            if(form.tailSize() > 3) {
+                throw new IllegalArgumentException("Invalid if form: " + form); //TODO
+            }
+            Object condition = form.getTail().getHead();
+            Object trueForm = form.getTail().getTail().getHead();
+            Object falseForm = form.getTail().getTail().getTail().getHead();
+            Object test = eval(condition, environment);
+            if(test == Nothing.AT_ALL) {
+                return eval(falseForm, environment);
+            } else {
+                return eval(trueForm, environment);
+            }
+        }
+    }
+
+    public class returnOperator extends Operator {
+
+        @Override
+        public Object apply(Tree form, Environment environment) {
+            throw new returnFromBlock(Nothing.AT_ALL, eval(form.getTail().getHead(), environment));
+        }
+    }
+
+    public static class returnFromBlock extends RuntimeException {
+        public final Object block;
+        public final Object value;
+
+        public returnFromBlock(Object block, Object value) {
+            this.block = block;
+            this.value = value;
         }
     }
 }

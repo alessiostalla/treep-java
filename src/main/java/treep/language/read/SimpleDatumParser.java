@@ -2,8 +2,6 @@ package treep.language.read;
 
 import treep.language.Object;
 import treep.language.datatypes.symbol.NameSpace;
-import treep.language.datatypes.tree.Cons;
-import treep.language.eval.SimpleEvaluator;
 import treep.math.RealNumber;
 
 import java.math.BigDecimal;
@@ -19,7 +17,7 @@ public class SimpleDatumParser implements DatumParser {
     @Override
     public Object parse(String text) {
         char c = text.charAt(0);
-        if(c >= '0' && c <= '9') {
+        if(c >= '0' && c <= '9') { //TODO
             return new RealNumber(new BigDecimal(text));
         } else {
             return nameSpace.intern(text);
