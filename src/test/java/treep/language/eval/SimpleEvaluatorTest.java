@@ -205,6 +205,19 @@ public class SimpleEvaluatorTest {
     }
 
     @Test
+    public void bindVariable() {
+        TreepLexer lexer = new TreepLexer(CharStreams.fromString("bind ((var x 3))\n\tx"));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        TreepParser parser = new TreepParser(tokens);
+        TreepParser.TreeContext tree = parser.tree();
+        ASTBuilder astBuilder = new ASTBuilder(new SimpleDatumParser(Symbols.NAMESPACE_TREEP));
+        Object ast = astBuilder.visit(tree);
+        Object object = new SimpleEvaluator().apply(ast);
+        assertTrue(object instanceof RealNumber);
+        assertEquals(new BigDecimal("3"), ((RealNumber) object).value);
+    }
+
+    @Test
     public void bindFunction() {
         TreepLexer lexer = new TreepLexer(CharStreams.fromString("bind ((function f (x) x))\n\tf 3"));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
@@ -228,6 +241,22 @@ public class SimpleEvaluatorTest {
         try {
             new SimpleEvaluator().apply(ast);
             fail("Invalid binding exception expected");
+        } catch (Exception e) {
+            //Ok
+        }
+    }
+
+    @Test
+    public void bindForbidden() {
+        TreepLexer lexer = new TreepLexer(CharStreams.fromString("bind ((nil 42))\n\tnil"));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        TreepParser parser = new TreepParser(tokens);
+        TreepParser.TreeContext tree = parser.tree();
+        ASTBuilder astBuilder = new ASTBuilder(new SimpleDatumParser(Symbols.NAMESPACE_TREEP));
+        Object ast = astBuilder.visit(tree);
+        try {
+            new SimpleEvaluator().apply(ast);
+            fail("Forbidden binding exception expected");
         } catch (Exception e) {
             //Ok
         }
@@ -302,6 +331,32 @@ public class SimpleEvaluatorTest {
         Object object = new SimpleEvaluator().apply(ast);
         assertTrue(object instanceof RealNumber);
         assertEquals(new BigDecimal("3"), ((RealNumber) object).value);
+    }
+
+    @Test
+    public void setUninitialized() {
+        TreepLexer lexer = new TreepLexer(CharStreams.fromString("bind ((var x))\n\tset! x 2\n\tx"));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        TreepParser parser = new TreepParser(tokens);
+        TreepParser.TreeContext tree = parser.tree();
+        ASTBuilder astBuilder = new ASTBuilder(new SimpleDatumParser(Symbols.NAMESPACE_TREEP));
+        Object ast = astBuilder.visit(tree);
+        Object object = new SimpleEvaluator().apply(ast);
+        assertTrue(object instanceof RealNumber);
+        assertEquals(new BigDecimal("2"), ((RealNumber) object).value);
+    }
+
+    @Test
+    public void setInitialized() {
+        TreepLexer lexer = new TreepLexer(CharStreams.fromString("bind ((var x 1))\n\tset! x 2\n\tx"));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        TreepParser parser = new TreepParser(tokens);
+        TreepParser.TreeContext tree = parser.tree();
+        ASTBuilder astBuilder = new ASTBuilder(new SimpleDatumParser(Symbols.NAMESPACE_TREEP));
+        Object ast = astBuilder.visit(tree);
+        Object object = new SimpleEvaluator().apply(ast);
+        assertTrue(object instanceof RealNumber);
+        assertEquals(new BigDecimal("2"), ((RealNumber) object).value);
     }
 
 }

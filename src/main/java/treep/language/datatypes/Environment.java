@@ -2,6 +2,7 @@ package treep.language.datatypes;
 
 import org.pcollections.Empty;
 import org.pcollections.PMap;
+import org.pcollections.PSet;
 import treep.language.Object;
 import treep.language.Symbols;
 import treep.language.datatypes.symbol.Symbol;
@@ -9,27 +10,49 @@ import treep.language.datatypes.tree.Nothing;
 
 public class Environment extends Object {
 
+    public static final PSet<Symbol> DEFAULT_FORBIDDEN_REBINDINGS =
+            Empty.<Symbol>set().plus(Symbols.THE_ENVIRONMENT).plus(Symbols.THE_GLOBAL_ENVIRONMENT).plus(Symbols.NIL);
     public final Object name;
     public final PMap<Symbol, Object> bindings;
+    public final PSet<Symbol> forbiddenRebindings = DEFAULT_FORBIDDEN_REBINDINGS;
 
     protected Environment(Object name, PMap<Symbol, Object> bindings) {
         this.name = name;
-        this.bindings = bindings;
+        this.bindings = bindings.plus(Symbols.THE_ENVIRONMENT, new Constant(this));
     }
 
     protected Environment(PMap<Symbol, Object> bindings) {
         this(Nothing.AT_ALL, bindings);
     }
 
+    public void checkRebindingAllowed(Symbol symbol) {
+        if(!isRebindingAllowed(symbol)) {
+            throw new IllegalArgumentException("Rebinding " + symbol + " is forbidden"); //TODO
+        }
+    }
+
+    public boolean isRebindingAllowed(Symbol symbol) {
+        return !forbiddenRebindings.contains(symbol) || !bindings.containsKey(symbol);
+    }
+
     public Environment extendWithValue(Symbol symbol, Object value) {
+        checkRebindingAllowed(symbol);
         return new Environment(bindings.plus(symbol, new Constant(value)));
     }
 
+
     public Environment extendWithFunction(Symbol symbol, Function function) {
+        checkRebindingAllowed(symbol);
+        return new Environment(bindings.plus(symbol, function));
+    }
+
+    public Environment extendWithVariable(Symbol symbol, Variable function) {
+        checkRebindingAllowed(symbol);
         return new Environment(bindings.plus(symbol, function));
     }
 
     public Environment extendWithOperator(Symbol symbol, Operator operator) {
+        checkRebindingAllowed(symbol);
         return new Environment(bindings.plus(symbol, operator));
     }
 
@@ -38,8 +61,7 @@ public class Environment extends Object {
     }
 
     public static Environment empty() {
-        Environment env = new Environment(Empty.map());
-        return env.extendWithValue(Symbols.THE_ENVIRONMENT, new Constant(env));
+        return new Environment(Empty.map());
     }
 
 }

@@ -21,7 +21,9 @@ public class Symbols {
     public static final Symbol NIL = NAMESPACE_TREEP.intern("nil");
     public static final Symbol QUOTE = NAMESPACE_TREEP.intern("quote");
     public static final Symbol RETURN = NAMESPACE_TREEP.intern("return");
+    public static final Symbol SET = NAMESPACE_TREEP.intern("set!");
     public static final Symbol TAIL = NAMESPACE_TREEP.intern("tail");
     public static final Symbol THE_ENVIRONMENT = NAMESPACE_TREEP.intern("the-environment");
+    public static final Symbol THE_GLOBAL_ENVIRONMENT = NAMESPACE_TREEP.intern("the-global-environment");
     public static final Symbol VAR = NAMESPACE_TREEP.intern("var");
 }

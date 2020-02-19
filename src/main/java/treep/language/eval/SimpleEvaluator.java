@@ -18,9 +18,17 @@ import java.util.List;
 
 public class SimpleEvaluator extends Function {
 
-    public Environment globalEnvironment = Environment.empty();
+    public Variable globalEnvironment = new Variable(Environment.empty()) {
+        @Override
+        public Environment apply(Object argument) {
+            if(!(argument instanceof Environment)) {
+                throw new IllegalArgumentException("Attempting to replace the global environment with " + argument + " which is not an environment"); //TODO
+            }
+            return (Environment) super.apply(argument);
+        }
+    };
     {
-        Environment env = globalEnvironment;
+        Environment env = (Environment) globalEnvironment.apply();
         env = env.extendWithFunction(Symbols.APPLY, new apply());
         env = env.extendWithOperator(Symbols.BIND, new bind());
         env = env.extendWithFunction(Symbols.CONS, new cons());
@@ -32,8 +40,10 @@ public class SimpleEvaluator extends Function {
         env = env.extendWithValue(Symbols.NIL, Nothing.AT_ALL);
         env = env.extendWithOperator(Symbols.RETURN, new returnOperator());
         env = env.extendWithOperator(Symbols.QUOTE, new quote());
+        env = env.extendWithOperator(Symbols.SET, new set());
         env = env.extendWithFunction(Symbols.TAIL, new tail());
-        globalEnvironment = env;
+        env = env.extendWithVariable(Symbols.THE_GLOBAL_ENVIRONMENT, globalEnvironment);
+        globalEnvironment.apply(env);
     }
 
     public SimpleEvaluator() {
@@ -41,7 +51,7 @@ public class SimpleEvaluator extends Function {
     }
 
     public Object apply(Object expression) {
-        return eval(expression, globalEnvironment);
+        return eval(expression, (Environment) globalEnvironment.apply());
     }
 
     public Object apply(Object expression, Object environment) {
@@ -278,6 +288,13 @@ public class SimpleEvaluator extends Function {
                         Tree definition = theBinding.tail.getTail();
                         Function function = makeFunction(definition, environment);
                         environment = environment.extendWithOperator((Symbol) name, new Macro(function));
+                    } else if(head == Symbols.VAR) {
+                        Object name = theBinding.tail.getHead();
+                        if(!(name instanceof Symbol)) {
+                            throw new IllegalArgumentException("Not a symbol: " + name); //TODO
+                        }
+                        Object value = theBinding.tail.getTail().getHead();
+                        environment = environment.extendWithFunction((Symbol) name, new Variable(value));
                     } else {
                         Object value = eval(theBinding.tail.getHead(), original);
                         environment = environment.extendWithValue((Symbol) head, value);
@@ -351,5 +368,36 @@ public class SimpleEvaluator extends Function {
             this.blockName = blockName;
             this.value = value;
         }
+    }
+
+    public class set extends Operator {
+
+        @Override
+        public Object apply(Tree form, Environment environment) {
+            int numberOfArguments = form.tailSize();
+            if(numberOfArguments < 2 || numberOfArguments % 2 != 0) {
+                throw new IllegalArgumentException("Invalid number of arguments: " + numberOfArguments); //TODO
+            }
+            Tree args = form.getTail();
+            while(args != Nothing.AT_ALL) {
+                if(!(args.getHead() instanceof Symbol)) {
+                    throw new IllegalArgumentException("Not a symbol: " + args.getHead()); //TODO
+                }
+                if(!(environment.bindings.get(args.getHead()) instanceof Variable)) {
+                    throw new IllegalArgumentException("Not a variable: " + args.getHead()); //TODO
+                }
+                args = args.getTail().getTail();
+            }
+
+            Object lastValue = Nothing.AT_ALL;
+            args = form.getTail();
+            while(args != Nothing.AT_ALL) {
+                Variable variable = (Variable) environment.bindings.get(args.getHead());
+                lastValue = variable.apply(eval(args.getTail().getHead(), environment));
+                args = args.getTail().getTail();
+            }
+            return lastValue;
+        }
+
     }
 }
