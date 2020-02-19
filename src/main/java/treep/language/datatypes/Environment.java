@@ -5,15 +5,20 @@ import org.pcollections.PMap;
 import treep.language.Object;
 import treep.language.Symbols;
 import treep.language.datatypes.symbol.Symbol;
+import treep.language.datatypes.tree.Nothing;
 
 public class Environment extends Object {
 
+    public final Object name;
     public final PMap<Symbol, Object> bindings;
-    public final PMap<Symbol, Object> defaultBindings = Empty.<Symbol, Object>map().plus(
-            Symbols.THE_ENVIRONMENT, new Constant(this));
+
+    protected Environment(Object name, PMap<Symbol, Object> bindings) {
+        this.name = name;
+        this.bindings = bindings;
+    }
 
     protected Environment(PMap<Symbol, Object> bindings) {
-        this.bindings = defaultBindings.plusAll(bindings);
+        this(Nothing.AT_ALL, bindings);
     }
 
     public Environment extendWithValue(Symbol symbol, Object value) {
@@ -28,8 +33,13 @@ public class Environment extends Object {
         return new Environment(bindings.plus(symbol, operator));
     }
 
+    public Environment withName(Object name) {
+        return new Environment(name, bindings);
+    }
+
     public static Environment empty() {
-        return new Environment(Empty.map());
+        Environment env = new Environment(Empty.map());
+        return env.extendWithValue(Symbols.THE_ENVIRONMENT, new Constant(env));
     }
 
 }

@@ -23,4 +23,5 @@ public class Symbols {
     public static final Symbol RETURN = NAMESPACE_TREEP.intern("return");
     public static final Symbol TAIL = NAMESPACE_TREEP.intern("tail");
     public static final Symbol THE_ENVIRONMENT = NAMESPACE_TREEP.intern("the-environment");
+    public static final Symbol VAR = NAMESPACE_TREEP.intern("var");
 }

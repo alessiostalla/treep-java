@@ -28,6 +28,7 @@ public class SimpleEvaluator extends Function {
         env = env.extendWithOperator(Symbols.FUNCTION, new function());
         env = env.extendWithFunction(Symbols.HEAD, new head());
         env = env.extendWithOperator(Symbols.IF, new ifOperator());
+        env = env.extendWithOperator(Symbols.LOOP, new loop());
         env = env.extendWithValue(Symbols.NIL, Nothing.AT_ALL);
         env = env.extendWithOperator(Symbols.RETURN, new returnOperator());
         env = env.extendWithOperator(Symbols.QUOTE, new quote());
@@ -235,6 +236,15 @@ public class SimpleEvaluator extends Function {
         }
     }
 
+    protected Object evalBody(Tree body, Environment environment) {
+        Object result = Nothing.AT_ALL;
+        while (body != Nothing.AT_ALL) {
+            result = eval(body.getHead(), environment);
+            body = body.getTail();
+        }
+        return result;
+    }
+
     public class bind extends Operator {
         @Override
         public Object apply(Tree form, Environment environment) {
@@ -277,13 +287,8 @@ public class SimpleEvaluator extends Function {
                 }
                 bindingsTree = bindingsTree.getTail();
             }
-            Object result = Nothing.AT_ALL;
             Tree body = form.getTail().getTail();
-            while (body != Nothing.AT_ALL) {
-                result = eval(body.getHead(), environment);
-                body = body.getTail();
-            }
-            return result;
+            return evalBody(body, environment);
         }
     }
 
@@ -310,16 +315,40 @@ public class SimpleEvaluator extends Function {
 
         @Override
         public Object apply(Tree form, Environment environment) {
-            throw new returnFromBlock(Nothing.AT_ALL, eval(form.getTail().getHead(), environment));
+            if(form.tailSize() > 2) {
+                throw new IllegalArgumentException("Invalid return form: " + form); //TODO
+            }
+            //TODO support return-from
+            Object value = form.getTail().getHead();
+            throw new returnFromBlock(Nothing.AT_ALL, eval(value, environment));
+        }
+    }
+
+    public class loop extends Operator {
+
+        @Override
+        public Object apply(Tree form, Environment environment) {
+            //TODO allow naming a loop?
+            Symbol loopName = Symbols.LOOP;
+            Environment loopEnvironment = environment.withName(loopName);
+            while(true) try {
+                evalBody(form.getTail(), loopEnvironment);
+            } catch (returnFromBlock r) {
+                if(r.blockName == Nothing.AT_ALL || r.blockName == loopName) {
+                    return r.value;
+                } else {
+                    throw r;
+                }
+            }
         }
     }
 
     public static class returnFromBlock extends RuntimeException {
-        public final Object block;
+        public final Object blockName;
         public final Object value;
 
-        public returnFromBlock(Object block, Object value) {
-            this.block = block;
+        public returnFromBlock(Object blockName, Object value) {
+            this.blockName = blockName;
             this.value = value;
         }
     }
