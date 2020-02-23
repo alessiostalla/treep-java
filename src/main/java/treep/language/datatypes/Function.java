@@ -20,6 +20,8 @@ public abstract class Function extends Object {
             return apply(arguments[0], arguments[1]);
         } else if(arguments.length == 3) {
             return apply(arguments[0], arguments[1], arguments[2]);
+        } else if(arguments.length == 4) {
+            return apply(arguments[0], arguments[1], arguments[2], arguments[3]);
         }
         throw new RuntimeException("Invalid number of arguments: " + arguments.length); //TODO
     }
@@ -38,6 +40,10 @@ public abstract class Function extends Object {
 
     public Object apply(Object argument1, Object argument2, Object argument3) {
         throw new RuntimeException("Invalid number of arguments: 3"); //TODO
+    }
+
+    public Object apply(Object argument1, Object argument2, Object argument3, Object argument4) {
+        throw new RuntimeException("Invalid number of arguments: 4"); //TODO
     }
 
 }

@@ -6,10 +6,7 @@ import treep.language.Object;
 import treep.language.datatypes.tree.Cons;
 import treep.language.datatypes.tree.Nothing;
 import treep.language.datatypes.tree.Tree;
-import treep.language.functions.apply;
-import treep.language.functions.head;
-import treep.language.functions.tail;
-import treep.language.functions.cons;
+import treep.language.functions.*;
 import treep.language.operators.quote;
 import treep.language.datatypes.symbol.Symbol;
 
@@ -32,6 +29,8 @@ public class SimpleEvaluator extends Function {
         env = env.extendWithFunction(Symbols.APPLY, new apply());
         env = env.extendWithOperator(Symbols.BIND, new bind());
         env = env.extendWithFunction(Symbols.CONS, new cons());
+        env = env.extendWithFunction(Symbols.CONSTANT, new constant());
+        env = env.extendWithFunction(Symbols.ENVIRONMENT_EXTEND_WITH, new environment_extend_with());
         env = env.extendWithFunction(Symbols.EVAL, this);
         env = env.extendWithOperator(Symbols.FUNCTION, new function());
         env = env.extendWithFunction(Symbols.HEAD, new head());
@@ -43,6 +42,7 @@ public class SimpleEvaluator extends Function {
         env = env.extendWithOperator(Symbols.SET, new set());
         env = env.extendWithFunction(Symbols.TAIL, new tail());
         env = env.extendWithVariable(Symbols.THE_GLOBAL_ENVIRONMENT, globalEnvironment);
+        env = env.extendWithFunction(Symbols.VAR, new variable());
         globalEnvironment.apply(env);
     }
 

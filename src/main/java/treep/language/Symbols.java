@@ -9,6 +9,8 @@ public class Symbols {
     public static final Symbol APPLY = NAMESPACE_TREEP.intern("apply");
     public static final Symbol BIND = NAMESPACE_TREEP.intern("bind");
     public static final Symbol CONS = NAMESPACE_TREEP.intern("cons");
+    public static final Symbol CONSTANT = NAMESPACE_TREEP.intern("constant");
+    public static final Symbol ENVIRONMENT_EXTEND_WITH = NAMESPACE_TREEP.intern("environment:extend-with");
     public static final Symbol EVAL = NAMESPACE_TREEP.intern("eval");
     public static final Symbol FUNCTION = NAMESPACE_TREEP.intern("function");
     public static final Symbol HEAD = NAMESPACE_TREEP.intern("head");
