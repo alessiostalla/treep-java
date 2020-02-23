@@ -41,7 +41,7 @@ public class SimpleEvaluator extends Function {
         env = env.extendWithOperator(Symbols.QUOTE, new quote());
         env = env.extendWithOperator(Symbols.SET, new set());
         env = env.extendWithFunction(Symbols.TAIL, new tail());
-        env = env.extendWithVariable(Symbols.THE_GLOBAL_ENVIRONMENT, globalEnvironment);
+        env = env.extendWithVariable(Symbols.ENVIRONMENT_GLOBAL, globalEnvironment);
         env = env.extendWithFunction(Symbols.VAR, new variable());
         globalEnvironment.apply(env);
     }

@@ -11,14 +11,14 @@ import treep.language.datatypes.tree.Nothing;
 public class Environment extends Object {
 
     public static final PSet<Symbol> DEFAULT_FORBIDDEN_REBINDINGS =
-            Empty.<Symbol>set().plus(Symbols.THE_ENVIRONMENT).plus(Symbols.THE_GLOBAL_ENVIRONMENT).plus(Symbols.NIL);
+            Empty.<Symbol>set().plus(Symbols.ENVIRONMENT_LOCAL).plus(Symbols.ENVIRONMENT_GLOBAL).plus(Symbols.NIL);
     public final Object name;
     public final PMap<Symbol, Object> bindings;
     public final PSet<Symbol> forbiddenRebindings = DEFAULT_FORBIDDEN_REBINDINGS;
 
     protected Environment(Object name, PMap<Symbol, Object> bindings) {
         this.name = name;
-        this.bindings = bindings.plus(Symbols.THE_ENVIRONMENT, new Constant(this));
+        this.bindings = bindings.plus(Symbols.ENVIRONMENT_LOCAL, new Constant(this));
     }
 
     protected Environment(PMap<Symbol, Object> bindings) {
