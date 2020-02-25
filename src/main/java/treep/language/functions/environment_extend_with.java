@@ -36,7 +36,7 @@ public class environment_extend_with extends Function {
                 throw new IllegalArgumentException("Not a macro: " + value); //TODO
             }
             return ((Environment) environment).extendWithOperator((Symbol) name, (Macro) value);
-        } else if(type == Symbols.VAR) {
+        } else if(type == Symbols.VARIABLE) {
             if(!(value instanceof Variable)) {
                 throw new IllegalArgumentException("Not a variable: " + value); //TODO
             }

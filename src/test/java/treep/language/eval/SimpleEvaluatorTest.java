@@ -206,7 +206,7 @@ public class SimpleEvaluatorTest {
 
     @Test
     public void bindVariable() {
-        TreepLexer lexer = new TreepLexer(CharStreams.fromString("bind ((var x 3))\n\tx"));
+        TreepLexer lexer = new TreepLexer(CharStreams.fromString("bind ((variable x 3))\n\tx"));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         TreepParser parser = new TreepParser(tokens);
         TreepParser.TreeContext tree = parser.tree();
@@ -335,7 +335,7 @@ public class SimpleEvaluatorTest {
 
     @Test
     public void setUninitialized() {
-        TreepLexer lexer = new TreepLexer(CharStreams.fromString("bind ((var x))\n\tset! x 2\n\tx"));
+        TreepLexer lexer = new TreepLexer(CharStreams.fromString("bind ((variable x))\n\tset! x 2\n\tx"));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         TreepParser parser = new TreepParser(tokens);
         TreepParser.TreeContext tree = parser.tree();
@@ -348,7 +348,7 @@ public class SimpleEvaluatorTest {
 
     @Test
     public void setInitialized() {
-        TreepLexer lexer = new TreepLexer(CharStreams.fromString("bind ((var x 1))\n\tset! x 2\n\tx"));
+        TreepLexer lexer = new TreepLexer(CharStreams.fromString("bind ((variable x 1))\n\tset! x 2\n\tx"));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         TreepParser parser = new TreepParser(tokens);
         TreepParser.TreeContext tree = parser.tree();

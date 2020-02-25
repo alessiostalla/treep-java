@@ -32,17 +32,19 @@ public class SimpleEvaluator extends Function {
         env = env.extendWithFunction(Symbols.CONSTANT, new constant());
         env = env.extendWithFunction(Symbols.ENVIRONMENT_EXTEND_WITH, new environment_extend_with());
         env = env.extendWithFunction(Symbols.EVAL, this);
+        env = env.extendWithFunction(Symbols.ERROR, new error());
         env = env.extendWithOperator(Symbols.FUNCTION, new function());
         env = env.extendWithFunction(Symbols.HEAD, new head());
         env = env.extendWithOperator(Symbols.IF, new ifOperator());
         env = env.extendWithOperator(Symbols.LOOP, new loop());
+        env = env.extendWithFunction(Symbols.MACRO_EXPAND, new macro_expand());
         env = env.extendWithValue(Symbols.NIL, Nothing.AT_ALL);
         env = env.extendWithOperator(Symbols.RETURN, new returnOperator());
         env = env.extendWithOperator(Symbols.QUOTE, new quote());
         env = env.extendWithOperator(Symbols.SET, new set());
         env = env.extendWithFunction(Symbols.TAIL, new tail());
         env = env.extendWithVariable(Symbols.ENVIRONMENT_GLOBAL, globalEnvironment);
-        env = env.extendWithFunction(Symbols.VAR, new variable());
+        env = env.extendWithFunction(Symbols.VARIABLE, new variable());
         globalEnvironment.apply(env);
     }
 
@@ -288,7 +290,7 @@ public class SimpleEvaluator extends Function {
                         Tree definition = theBinding.tail.getTail();
                         Function function = makeFunction(definition, environment);
                         environment = environment.extendWithOperator((Symbol) name, new Macro(function));
-                    } else if(head == Symbols.VAR) {
+                    } else if(head == Symbols.VARIABLE) {
                         Object name = theBinding.tail.getHead();
                         if(!(name instanceof Symbol)) {
                             throw new IllegalArgumentException("Not a symbol: " + name); //TODO
@@ -399,5 +401,51 @@ public class SimpleEvaluator extends Function {
             return lastValue;
         }
 
+    }
+
+    public static class error extends Function {
+        protected error() {
+            super(new Cons(new Cons(Nothing.AT_ALL))); //TODO
+        }
+
+        @Override
+        public Object apply(Object message) {
+            throw new RuntimeException(message.toString()); //TODO
+        }
+
+        @Override
+        public Object apply(Object type, Object message) {
+            throw new RuntimeException(message.toString()); //TODO
+        }
+    }
+
+    public class macro_expand extends Function {
+
+        protected macro_expand() {
+            super(new Cons(new Cons(Nothing.AT_ALL))); //TODO
+        }
+
+        @Override
+        public Object apply(Object form) {
+            Environment environment = (Environment) globalEnvironment.apply();
+            return apply(form, environment);
+        }
+
+        @Override
+        public Object apply(Object form, Object environment) {
+            if(!(environment instanceof Environment)) {
+                throw new IllegalArgumentException("Not an environment: " + environment); //TODO
+            }
+            if(form instanceof Cons) {
+                Object head = ((Cons) form).getHead();
+                Object macro = ((Environment) environment).bindings.get(head);
+                if(macro instanceof Macro) {
+                    return ((Macro) macro).apply((Tree) form, ((Environment) environment));
+                } else {
+                    return form;
+                }
+            }
+            return form;
+        }
     }
 }
