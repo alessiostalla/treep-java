@@ -25,24 +25,28 @@ public class SimpleEvaluator extends Function {
         }
     };
     {
-        Environment env = (Environment) globalEnvironment.apply();
+        Environment env = getGlobalEnvironment();
         env = env.extendWithFunction(Symbols.APPLY, new apply());
         env = env.extendWithOperator(Symbols.BIND, new bind());
         env = env.extendWithFunction(Symbols.CONS, new cons());
         env = env.extendWithFunction(Symbols.CONSTANT, new constant());
-        env = env.extendWithFunction(Symbols.ENVIRONMENT_EXTEND_WITH, new environment_extend_with());
+        env = env.extendWithFunction(Symbols.ENVIRONMENT_EXTEND, new environment_extend());
         env = env.extendWithFunction(Symbols.EVAL, this);
+        env = env.extendWithFunction(Symbols.EQ, new eq());
         env = env.extendWithFunction(Symbols.ERROR, new error());
         env = env.extendWithOperator(Symbols.FUNCTION, new function());
         env = env.extendWithFunction(Symbols.HEAD, new head());
         env = env.extendWithOperator(Symbols.IF, new ifOperator());
         env = env.extendWithOperator(Symbols.LOOP, new loop());
+        env = env.extendWithOperator(Symbols.MACRO, new macro());
         env = env.extendWithFunction(Symbols.MACRO_EXPAND, new macro_expand());
-        env = env.extendWithValue(Symbols.NIL, Nothing.AT_ALL);
+        env = env.extendWithConstant(Symbols.NIL, Nothing.AT_ALL);
         env = env.extendWithOperator(Symbols.RETURN, new returnOperator());
         env = env.extendWithOperator(Symbols.QUOTE, new quote());
         env = env.extendWithOperator(Symbols.SET, new set());
+        env = env.extendWithConstant(Symbols.T, Symbols.T);
         env = env.extendWithFunction(Symbols.TAIL, new tail());
+        env = env.extendWithOperator(Symbols.TEMPLATE, new template());
         env = env.extendWithVariable(Symbols.ENVIRONMENT_GLOBAL, globalEnvironment);
         env = env.extendWithFunction(Symbols.VARIABLE, new variable());
         globalEnvironment.apply(env);
@@ -53,7 +57,11 @@ public class SimpleEvaluator extends Function {
     }
 
     public Object apply(Object expression) {
-        return eval(expression, (Environment) globalEnvironment.apply());
+        return eval(expression, getGlobalEnvironment());
+    }
+
+    public Environment getGlobalEnvironment() {
+        return (Environment) globalEnvironment.apply();
     }
 
     public Object apply(Object expression, Object environment) {
@@ -186,6 +194,15 @@ public class SimpleEvaluator extends Function {
         }
     }
 
+    public class macro extends Operator {
+
+        @Override
+        public Object apply(Tree form, Environment environment) {
+            Tree definition = form.getTail();
+            return new Macro(makeFunction(definition, environment));
+        }
+    }
+
     public static class InterpretedFunction extends Closure {
 
         public final Object body;
@@ -220,7 +237,7 @@ public class SimpleEvaluator extends Function {
 
         @Override
         public Object apply(Object argument) {
-            return evaluator.apply(body, enclosingEnvironment.extendWithValue(argumentName, argument));
+            return evaluator.apply(body, enclosingEnvironment.extendWithConstant(argumentName, argument));
         }
     }
 
@@ -241,7 +258,7 @@ public class SimpleEvaluator extends Function {
             Environment environment = enclosingEnvironment;
             Tree arg = argumentNames;
             for (int i = 0; i < arguments.length; i++) {
-                environment = environment.extendWithValue((Symbol) arg.getHead(), arguments[i]);
+                environment = environment.extendWithConstant((Symbol) arg.getHead(), arguments[i]);
                 arg = arg.getTail();
             }
             return evaluator.apply(body, environment);
@@ -299,7 +316,7 @@ public class SimpleEvaluator extends Function {
                         environment = environment.extendWithFunction((Symbol) name, new Variable(value));
                     } else {
                         Object value = eval(theBinding.tail.getHead(), original);
-                        environment = environment.extendWithValue((Symbol) head, value);
+                        environment = environment.extendWithConstant((Symbol) head, value);
                     }
                 } else {
                     throw new IllegalArgumentException("Invalid binding: " + binding); //TODO
@@ -427,8 +444,7 @@ public class SimpleEvaluator extends Function {
 
         @Override
         public Object apply(Object form) {
-            Environment environment = (Environment) globalEnvironment.apply();
-            return apply(form, environment);
+            return apply(form, getGlobalEnvironment());
         }
 
         @Override

@@ -156,4 +156,14 @@ public class TreepParserTest {
         assertEquals(0, parser.getNumberOfSyntaxErrors());
     }
 
+    @Test
+    public void templateSimple() {
+        TreepLexer lexer = new TreepLexer(CharStreams.fromString("`a"));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        TreepParser parser = new TreepParser(tokens);
+        TreepParser.TopLevelTreeContext tree = parser.topLevelTree();
+        assertNotNull(tree);
+        assertEquals(0, parser.getNumberOfSyntaxErrors());
+    }
+
 }

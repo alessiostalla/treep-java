@@ -11,7 +11,9 @@ import treep.language.datatypes.tree.Nothing;
 public class Environment extends Object {
 
     public static final PSet<Symbol> DEFAULT_FORBIDDEN_REBINDINGS =
-            Empty.<Symbol>set().plus(Symbols.ENVIRONMENT_LOCAL).plus(Symbols.ENVIRONMENT_GLOBAL).plus(Symbols.NIL);
+            Empty.<Symbol>set()
+                    .plus(Symbols.ENVIRONMENT_GLOBAL).plus(Symbols.ENVIRONMENT_LOCAL)
+                    .plus(Symbols.NIL).plus(Symbols.T);
     public final Object name;
     public final PMap<Symbol, Object> bindings;
     public final PSet<Symbol> forbiddenRebindings = DEFAULT_FORBIDDEN_REBINDINGS;
@@ -35,7 +37,7 @@ public class Environment extends Object {
         return !forbiddenRebindings.contains(symbol) || !bindings.containsKey(symbol);
     }
 
-    public Environment extendWithValue(Symbol symbol, Object value) {
+    public Environment extendWithConstant(Symbol symbol, Object value) {
         checkRebindingAllowed(symbol);
         return new Environment(bindings.plus(symbol, new Constant(value)));
     }

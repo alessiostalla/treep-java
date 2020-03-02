@@ -11,6 +11,8 @@ import treep.language.datatypes.tree.Cons;
 import treep.language.datatypes.tree.Nothing;
 import treep.language.datatypes.tree.Tree;
 
+import java.util.List;
+
 public class ASTBuilder extends TreepBaseVisitor<Object> {
 
     protected final DatumParser datumParser;
@@ -28,7 +30,9 @@ public class ASTBuilder extends TreepBaseVisitor<Object> {
     public Object visitTree(TreepParser.TreeContext ctx) {
         PStack<Object> children = Empty.stack();
         if(ctx.node().size() == 1 && ctx.tree().isEmpty()) {
-            return ctx.node(0).accept(this);
+            Object node = ctx.node(0).accept(this);
+            node = applyModifiers(node, ctx.modifier);
+            return node;
         }
         for(ParseTree node : ctx.node()) {
             children = children.plus(node.accept(this));
@@ -40,9 +44,7 @@ public class ASTBuilder extends TreepBaseVisitor<Object> {
         for(Object child : children) {
             tree = new Cons(child, tree);
         }
-        if(ctx.QUOTE() != null) {
-            tree = new Cons(Symbols.QUOTE, new Cons((Object) tree));
-        }
+        tree = (Tree) applyModifiers((Object) tree, ctx.modifier);
         return (Object) tree;
     }
 
@@ -62,10 +64,26 @@ public class ASTBuilder extends TreepBaseVisitor<Object> {
     @Override
     public Object visitNode(TreepParser.NodeContext ctx) {
         Object object = super.visitNode(ctx);
-        if(ctx.QUOTE() != null) {
-            return new Cons(Symbols.QUOTE, object);
+        object = applyModifiers(object, ctx.modifier);
+        return object;
+    }
+
+    public Object applyModifiers(Object object, List<Token> modifier) {
+        for(int i = modifier.size() - 1; i >= 0; i--) {
+            object = applyModifier(object, modifier.get(i));
+        }
+        return object;
+    }
+
+    public Cons applyModifier(Object object, Token modifier) {
+        if(modifier.getType() == TreepParser.INSERT) {
+            return new Cons(Symbols.INSERT, new Cons(object));
+        } else if(modifier.getType() == TreepParser.QUOTE) {
+            return new Cons(Symbols.QUOTE, new Cons(object));
+        } else if(modifier.getType() == TreepParser.TEMPLATE) {
+            return new Cons(Symbols.TEMPLATE, new Cons(object));
         } else {
-            return object;
+            throw new RuntimeException("Unsupported modifier: " + modifier);
         }
     }
 

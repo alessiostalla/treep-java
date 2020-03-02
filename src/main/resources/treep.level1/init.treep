@@ -1,0 +1,7 @@
+set! environment:global
+    environment:extend environment:global 'macro 'def
+        macro (type name macro:body)
+            if (eq type 'constant)
+                `set! environment:global
+                    environment:extend environment:global 'constant ,name ,(head macro:body) #Do no checks here - this is the minimal version
+            error 'unsupported-definition

@@ -10,9 +10,9 @@ import treep.language.datatypes.symbol.Symbol;
 import treep.language.datatypes.tree.Cons;
 import treep.language.datatypes.tree.Nothing;
 
-public class environment_extend_with extends Function {
+public class environment_extend extends Function {
 
-    public environment_extend_with() {
+    public environment_extend() {
         super(new Cons(Nothing.AT_ALL, new Cons(Nothing.AT_ALL, new Cons(Nothing.AT_ALL)))); //TODO
     }
 
@@ -25,7 +25,7 @@ public class environment_extend_with extends Function {
             throw new IllegalArgumentException("Not a symbol: " + name); //TODO
         }
         if(type == Symbols.CONSTANT) {
-            return ((Environment) environment).extendWithValue((Symbol) name, value);
+            return ((Environment) environment).extendWithConstant((Symbol) name, value);
         } else if(type == Symbols.FUNCTION) {
             if(!(value instanceof Function)) {
                 throw new IllegalArgumentException("Not a function: " + value); //TODO
