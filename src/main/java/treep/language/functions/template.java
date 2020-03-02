@@ -23,16 +23,11 @@ public class template extends Function {
             Tree tail = ((Tree) tree).getTail();
             if(head == Symbols.INSERT) {
                 return tail.getHead(); //TODO check tail is nil
-            } else if(head == Symbols.TEMPLATE) {
-                return apply(apply((Object) tail));
             } else {
-                return new Cons(Symbols.CONS, new Cons(apply(head), apply((Object) tail)));
+                return new Cons(Symbols.CONS, new Cons(apply(head), new Cons(apply((Object) tail))));
             }
-        } else if(tree instanceof Symbol) {
-            return new Cons(Symbols.QUOTE, new Cons(tree));
-        } else {
-            return tree;
         }
+        return new Cons(Symbols.QUOTE, new Cons(tree));
     }
 
 }

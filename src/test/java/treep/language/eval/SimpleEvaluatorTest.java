@@ -362,6 +362,19 @@ public class SimpleEvaluatorTest {
     }
 
     @Test
+    public void templateDouble() {
+        TreepLexer lexer = new TreepLexer(CharStreams.fromString("``a"));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        TreepParser parser = new TreepParser(tokens);
+        TreepParser.TopLevelTreeContext tree = parser.topLevelTree();
+        ASTBuilder astBuilder = new ASTBuilder(new SimpleDatumParser(Symbols.NAMESPACE_TREEP));
+        Object ast = astBuilder.visit(tree);
+        Object object = new SimpleEvaluator().apply(ast);
+        object = new SimpleEvaluator().apply(object);
+        assertEquals(Symbols.NAMESPACE_TREEP.intern("a"), object);
+    }
+
+    @Test
     public void templateInsert() {
         TreepLexer lexer = new TreepLexer(CharStreams.fromString("`,a"));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
