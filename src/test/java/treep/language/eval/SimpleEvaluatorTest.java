@@ -358,10 +358,7 @@ public class SimpleEvaluatorTest {
         ASTBuilder astBuilder = new ASTBuilder(new SimpleDatumParser(Symbols.NAMESPACE_TREEP));
         Object ast = astBuilder.visit(tree);
         Object object = new SimpleEvaluator().apply(ast);
-        assertTrue(object instanceof Cons);
-        object = new SimpleEvaluator().apply(object);
-        assertTrue(object instanceof Cons);
-        assertEquals(Symbols.NAMESPACE_TREEP.intern("a"), ((Cons) object).head);
+        assertEquals(Symbols.NAMESPACE_TREEP.intern("a"), object);
     }
 
     @Test
