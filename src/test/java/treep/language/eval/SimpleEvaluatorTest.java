@@ -389,6 +389,20 @@ public class SimpleEvaluatorTest {
     }
 
     @Test
+    public void templateSplice() {
+        TreepLexer lexer = new TreepLexer(CharStreams.fromString("`(,@a)"));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        TreepParser parser = new TreepParser(tokens);
+        TreepParser.TreeContext tree = parser.tree();
+        ASTBuilder astBuilder = new ASTBuilder(new SimpleDatumParser(Symbols.NAMESPACE_TREEP));
+        Object ast = astBuilder.visit(tree);
+        Cons value = new Cons(new RealNumber(new BigDecimal("1")), new RealNumber(new BigDecimal("2")));
+        Symbol a = Symbols.NAMESPACE_TREEP.intern("a");
+        SimpleEvaluator eval = new SimpleEvaluator();
+        assertEquals(value, eval.eval(ast, eval.getGlobalEnvironment().extendWithConstant(a, value)));
+    }
+
+    @Test
     public void setUninitialized() {
         TreepLexer lexer = new TreepLexer(CharStreams.fromString("bind ((variable x))\n\tset! x 2\n\tx"));
         CommonTokenStream tokens = new CommonTokenStream(lexer);

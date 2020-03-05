@@ -6,6 +6,7 @@ import treep.language.datatypes.symbol.Symbol;
 public class Symbols {
     public static final NameSpace NAMESPACE_TREEP = new NameSpace();
     //The very base language
+    public static final Symbol APPEND = NAMESPACE_TREEP.intern("append");
     public static final Symbol APPLY = NAMESPACE_TREEP.intern("apply");
     public static final Symbol BIND = NAMESPACE_TREEP.intern("bind");
     public static final Symbol CONS = NAMESPACE_TREEP.intern("cons");
@@ -27,9 +28,11 @@ public class Symbols {
     public static final Symbol MACRO_EXPAND = NAMESPACE_TREEP.intern("macro:expand");
     public static final Symbol MACRO_FORM = NAMESPACE_TREEP.intern("macro:form");
     public static final Symbol NIL = NAMESPACE_TREEP.intern("nil");
+    public static final Symbol QUIT = NAMESPACE_TREEP.intern("quit");
     public static final Symbol QUOTE = NAMESPACE_TREEP.intern("quote");
     public static final Symbol RETURN = NAMESPACE_TREEP.intern("return");
     public static final Symbol SET = NAMESPACE_TREEP.intern("set!");
+    public static final Symbol SPLICE = NAMESPACE_TREEP.intern("splice");
     public static final Symbol T = NAMESPACE_TREEP.intern("T");
     public static final Symbol TAIL = NAMESPACE_TREEP.intern("tail");
     public static final Symbol TEMPLATE = NAMESPACE_TREEP.intern("template");

@@ -47,18 +47,19 @@ grammar Treep;
 topLevelTree: (INDENT* INDENT{pushIndentation();})? tree{resetIndentation();};
 
 tree:
-  (modifier+=(QUOTE | TEMPLATE | INSERT)*) node node*
+  modifier+=(INSERT | QUOTE | SPLICE_INSERT | TEMPLATE)* node node*
   ({checkIndentation()}? INDENT{pushIndentation();} tree{popIndentation();})*;
 
 list: LPAREN (node | INDENT)* RPAREN; //TODO use modes to remove indent token?
 
-node: (modifier+=(QUOTE | TEMPLATE | INSERT)*) (DATUM | list);
+node: modifier+=(INSERT | QUOTE | SPLICE_INSERT | TEMPLATE)* (DATUM | list);
 
 LPAREN: '(';
 RPAREN: ')';
 INDENT: NEWLINE (' ' | '\t')*;
 QUOTE: '\'';
 TEMPLATE: '`';
+SPLICE_INSERT: ',@';
 INSERT: ',';
 DATUM: (~(' ' | '\t' | '\r' | '\n' | '(' | ')' | '\'' | '`' | ','))+; //TODO escaping (using modes?)
 LINE_COMMENT: ('#' .*? NEWLINE | EOF) -> skip;  //TODO redirect to another channel?

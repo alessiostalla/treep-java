@@ -10,8 +10,7 @@ import treep.language.datatypes.tree.Cons;
 import treep.language.datatypes.tree.Nothing;
 import treep.math.RealNumber;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ASTBuilderTest {
 
@@ -95,6 +94,20 @@ public class ASTBuilderTest {
         Object ast = new ASTBuilder(new SimpleDatumParser(new NameSpace())).visit(tree);
         assertTrue(ast instanceof Symbol);
         assertEquals("a", ((Symbol) ast).name);
+    }
+
+    @Test
+    public void treeVaryingIndentationWithList() {
+        TreepLexer lexer = new TreepLexer(CharStreams.fromString("a (b c\n\td e)\n\t\tf\n\tg h"));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        TreepParser parser = new TreepParser(tokens);
+        TreepParser.TopLevelTreeContext tree = parser.topLevelTree();
+        Object ast = new ASTBuilder(new SimpleDatumParser(new NameSpace())).visit(tree);
+        assertTrue(ast instanceof Cons);
+        Cons cons = (Cons) ast;
+        assertEquals("a", ((Symbol) cons.getHead()).name);
+        assertTrue(cons.getTail().getHead() instanceof Cons);
+        assertTrue(((Cons) cons.getTail().getHead()).getHead() instanceof Symbol);
     }
 
 }

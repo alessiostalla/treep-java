@@ -80,6 +80,8 @@ public class ASTBuilder extends TreepBaseVisitor<Object> {
             return new Cons(Symbols.INSERT, new Cons(object));
         } else if(modifier.getType() == TreepParser.QUOTE) {
             return new Cons(Symbols.QUOTE, new Cons(object));
+        } else if(modifier.getType() == TreepParser.SPLICE_INSERT) {
+            return new Cons(Symbols.SPLICE, new Cons(object));
         } else if(modifier.getType() == TreepParser.TEMPLATE) {
             return new Cons(Symbols.TEMPLATE, new Cons(object));
         } else {

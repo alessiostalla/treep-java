@@ -44,4 +44,7 @@ public class Cons extends Object implements Tree {
         return tail;
     }
 
+    public Cons append(Tree cons) {
+        return new Cons(head, tail.append(cons));
+    }
 }

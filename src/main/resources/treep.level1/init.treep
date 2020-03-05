@@ -4,4 +4,13 @@ set! environment:global
             if (eq type 'constant)
                 `set! environment:global
                     environment:extend environment:global 'constant ,name ,(head macro:body) #Do no checks here - this is the minimal version
-            error 'unsupported-definition
+                if (eq type 'variable)
+                    `set! environment:global
+                        environment:extend environment:global 'variable ,name ,(head macro:body) #Do no checks here - this is the minimal version
+                    if (eq type 'function)
+                        `set! environment:global
+                            environment:extend environment:global 'function ,name (function ,@macro:body)
+                        if (eq type 'macro)
+                            `set! environment:global
+                                environment:extend environment:global 'macro ,name (macro ,@macro:body)
+                            error 'unsupported-definition

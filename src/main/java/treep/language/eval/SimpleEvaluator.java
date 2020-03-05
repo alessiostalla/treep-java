@@ -1,5 +1,7 @@
 package treep.language.eval;
 
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
 import treep.language.Symbols;
 import treep.language.datatypes.*;
 import treep.language.Object;
@@ -9,7 +11,14 @@ import treep.language.datatypes.tree.Tree;
 import treep.language.functions.*;
 import treep.language.operators.quote;
 import treep.language.datatypes.symbol.Symbol;
+import treep.language.read.ASTBuilder;
+import treep.language.read.SimpleDatumParser;
+import treep.language.read.TreepLexer;
+import treep.language.read.TreepParser;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,6 +35,7 @@ public class SimpleEvaluator extends Function {
     };
     {
         Environment env = getGlobalEnvironment();
+        env = env.extendWithFunction(Symbols.APPEND, new append());
         env = env.extendWithFunction(Symbols.APPLY, new apply());
         env = env.extendWithOperator(Symbols.BIND, new bind());
         env = env.extendWithFunction(Symbols.CONS, new cons());
@@ -42,6 +52,7 @@ public class SimpleEvaluator extends Function {
         env = env.extendWithFunction(Symbols.MACRO_EXPAND, new macro_expand());
         env = env.extendWithConstant(Symbols.NIL, Nothing.AT_ALL);
         env = env.extendWithOperator(Symbols.RETURN, new returnOperator());
+        env = env.extendWithFunction(Symbols.QUIT, new quit());
         env = env.extendWithOperator(Symbols.QUOTE, new quote());
         env = env.extendWithOperator(Symbols.SET, new set());
         env = env.extendWithConstant(Symbols.T, Symbols.T);
@@ -117,9 +128,10 @@ public class SimpleEvaluator extends Function {
     public Object evalFunctionApplication(Function function, Tree expression, Environment environment) {
         //TODO optimize for 1, 2, 3 arguments
         List<Object> arguments = new ArrayList<>(2);
-        while (expression.getTail() != Nothing.AT_ALL) {
-            expression = expression.getTail();
-            arguments.add(eval(expression.getHead(), environment));
+        Tree args = expression.getTail();
+        while (args != Nothing.AT_ALL) {
+            arguments.add(eval(args.getHead(), environment));
+            args = args.getTail();
         }
         return function.apply(arguments.toArray(new Object[0]));
     }
@@ -463,5 +475,46 @@ public class SimpleEvaluator extends Function {
             }
             return form;
         }
+    }
+
+    public static class quit extends Function {
+        protected quit() {
+            super(Nothing.AT_ALL);
+        }
+
+        @Override
+        public Object apply() {
+            throw new EvaluationTerminatedException();
+        }
+    }
+
+    public static class EvaluationTerminatedException extends RuntimeException {}
+
+    public static void main(String[] args) throws IOException {
+        String lineSeparator = System.getProperty("line.separator");
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        SimpleEvaluator eval = new SimpleEvaluator();
+        String input = "";
+        try {
+            while (true) {
+                String line = reader.readLine();
+                input += line + lineSeparator;
+                String trim = input.trim();
+                if((line.trim().isEmpty() && !trim.isEmpty()) || trim.startsWith("(") || trim.startsWith("'(")) {
+                    TreepLexer lexer = new TreepLexer(CharStreams.fromString(input));
+                    CommonTokenStream tokens = new CommonTokenStream(lexer);
+                    TreepParser parser = new TreepParser(tokens);
+                    TreepParser.TreeContext tree = parser.topLevelTree().tree();
+                    if(parser.getNumberOfSyntaxErrors() == 0) {
+                        ASTBuilder astBuilder = new ASTBuilder(new SimpleDatumParser(Symbols.NAMESPACE_TREEP));
+                        Object form = astBuilder.visit(tree);
+                        Object result = eval.apply(form);
+                        System.out.println(result);
+                        input = "";
+                    }
+                }
+
+            }
+        } catch(EvaluationTerminatedException e) {}
     }
 }

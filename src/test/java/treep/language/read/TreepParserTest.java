@@ -78,15 +78,27 @@ public class TreepParserTest {
     }
 
     @Test
-    public void treeVaryingIndentation() {
+    public void treeVaryingIndentationTabs() {
         TreepLexer lexer = new TreepLexer(CharStreams.fromString("a b c\n\td e\n\t\tf\n\tg h\ni"));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         TreepParser parser = new TreepParser(tokens);
         TreepParser.TopLevelTreeContext tree = parser.topLevelTree();
         assertNotNull(tree);
         assertEquals(0, parser.getNumberOfSyntaxErrors());
-        assertEquals(1, tree.children.size());
-        assertEquals(7, tree.tree().children.size());
+        assertEquals(3, tree.tree().node().size());
+        assertEquals(2, tree.tree().tree().size());
+    }
+
+    @Test
+    public void treeVaryingIndentationSpaces() {
+        TreepLexer lexer = new TreepLexer(CharStreams.fromString("a b c\n  d e\n    f\n  g h\ni"));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        TreepParser parser = new TreepParser(tokens);
+        TreepParser.TopLevelTreeContext tree = parser.topLevelTree();
+        assertNotNull(tree);
+        assertEquals(0, parser.getNumberOfSyntaxErrors());
+        assertEquals(3, tree.tree().node().size());
+        assertEquals(2, tree.tree().tree().size());
     }
 
     @Test
@@ -97,6 +109,8 @@ public class TreepParserTest {
         TreepParser.TopLevelTreeContext tree = parser.topLevelTree();
         assertNotNull(tree);
         assertEquals(0, parser.getNumberOfSyntaxErrors());
+        assertEquals(1, tree.tree().node().size());
+        assertEquals(2, tree.tree().tree().size());
     }
 
     @Test
@@ -147,13 +161,27 @@ public class TreepParserTest {
     }
 
     @Test
-    public void treeVaryingIndentationWithList() {
+    public void treeVaryingIndentationTabsWithList() {
         TreepLexer lexer = new TreepLexer(CharStreams.fromString("a (b c\n\td e)\n\t\tf\n\tg h"));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         TreepParser parser = new TreepParser(tokens);
         TreepParser.TopLevelTreeContext tree = parser.topLevelTree();
         assertNotNull(tree);
         assertEquals(0, parser.getNumberOfSyntaxErrors());
+        assertEquals(2, tree.tree().node().size());
+        assertEquals(2, tree.tree().tree().size());
+    }
+
+    @Test
+    public void treeVaryingIndentationSpacesWithList() {
+        TreepLexer lexer = new TreepLexer(CharStreams.fromString("a (b c\n    d e)\n        f\n  g h"));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        TreepParser parser = new TreepParser(tokens);
+        TreepParser.TopLevelTreeContext tree = parser.topLevelTree();
+        assertNotNull(tree);
+        assertEquals(0, parser.getNumberOfSyntaxErrors());
+        assertEquals(2, tree.tree().node().size());
+        assertEquals(2, tree.tree().tree().size());
     }
 
     @Test

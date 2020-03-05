@@ -17,17 +17,42 @@ public class template extends Function {
         super(new Cons(Symbols.TEMPLATE)); //TODO
     }
 
+    @Override
     public Object apply(Object tree) {
         if(tree instanceof Cons) {
-            Object head = ((Tree) tree).getHead();
-            Tree tail = ((Tree) tree).getTail();
-            if(head == Symbols.INSERT) {
-                return tail.getHead(); //TODO check tail is nil
-            } else {
-                return new Cons(Symbols.CONS, new Cons(apply(head), new Cons(apply((Object) tail))));
+            Cons theTree = (Cons) tree;
+            if(theTree.getHead() == Symbols.INSERT) {
+                return theTree.getTail().getHead(); //TODO check tail is nil
+            } else if(theTree.getHead() == Symbols.SPLICE) {
+                throw new IllegalArgumentException("Splice (,@) outside of a list context"); //TODO
             }
+            return processList((Tree) tree);
+        } else {
+            return new Cons(Symbols.QUOTE, new Cons(tree));
         }
-        return new Cons(Symbols.QUOTE, new Cons(tree));
     }
+
+    public Cons processList(Tree tree) {
+        Tree theTree = tree;
+        Cons result = new Cons(Symbols.APPEND);
+        while(theTree != Nothing.AT_ALL) {
+            Object elem = theTree.getHead();
+            if(elem instanceof Cons) {
+                Cons cons = (Cons) elem;
+                if(cons.head == Symbols.INSERT) {
+                    result = result.append(new Cons(new Cons(Symbols.CONS, new Cons(cons.tail.getHead())))); //TODO check tail is nil
+                } else if(cons.getHead() == Symbols.SPLICE) {
+                    result = result.append(cons.tail);
+                } else {
+                    result = result.append(new Cons(processList(cons)));
+                }
+            } else {
+                result = result.append(new Cons(new Cons(Symbols.QUOTE, new Cons(new Cons(elem)))));
+            }
+            theTree = theTree.getTail();
+        }
+        return result;
+    }
+
 
 }

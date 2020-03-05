@@ -17,4 +17,9 @@ public class Nothing extends Object implements Tree {
     public Tree getTail() {
         return this;
     }
+
+    @Override
+    public Tree append(Tree tree) {
+        return tree;
+    }
 }

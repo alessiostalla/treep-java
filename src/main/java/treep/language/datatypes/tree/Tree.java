@@ -17,4 +17,6 @@ public interface Tree {
         }
         return size;
     }
+
+    Tree append(Tree tree);
 }
