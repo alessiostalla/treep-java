@@ -491,7 +491,7 @@ public class SimpleEvaluator extends Function {
     public static class EvaluationTerminatedException extends RuntimeException {}
 
     public static void main(String[] args) throws IOException {
-        String lineSeparator = System.getProperty("line.separator");
+        String lineSeparator = System.lineSeparator();
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         SimpleEvaluator eval = new SimpleEvaluator();
         String input = "";

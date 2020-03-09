@@ -47,4 +47,15 @@ public class Cons extends Object implements Tree {
     public Cons append(Tree cons) {
         return new Cons(head, tail.append(cons));
     }
+
+    @Override
+    public String toString() {
+        StringBuilder result = new StringBuilder("(" + head);
+        Tree rest = tail;
+        while (rest != Nothing.AT_ALL) {
+            result.append(" ").append(rest.getHead());
+            rest = rest.getTail();
+        }
+        return result + ")";
+    }
 }

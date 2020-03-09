@@ -8,6 +8,7 @@ import treep.language.datatypes.symbol.NameSpace;
 import treep.language.datatypes.symbol.Symbol;
 import treep.language.datatypes.tree.Cons;
 import treep.language.datatypes.tree.Nothing;
+import treep.language.datatypes.tree.Tree;
 import treep.math.RealNumber;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -82,6 +83,138 @@ public class ASTBuilderTest {
         child = root.tail.getTail().getHead();
         assertTrue(child instanceof Symbol);
         assertEquals("c", ((Symbol) child).name);
+    }
+
+    @Test
+    public void treeSubtree() {
+        TreepLexer lexer = new TreepLexer(CharStreams.fromString("a\n\tb c d"));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        TreepParser parser = new TreepParser(tokens);
+        TreepParser.TopLevelTreeContext tree = parser.topLevelTree();
+        Object ast = new ASTBuilder(new SimpleDatumParser(new NameSpace())).visit(tree);
+        assertTrue(ast instanceof Cons);
+        Cons root = (Cons) ast;
+        assertTrue(root.head instanceof Symbol);
+        assertEquals("a", ((Symbol) root.head).name);
+        assertEquals(1, root.tailSize());
+        Object child = root.tail.getHead();
+        assertTrue(child instanceof Tree);
+        assertEquals(2, ((Tree) child).tailSize());
+        assertEquals("b", ((Symbol) ((Tree) child).getHead()).name);
+        assertEquals("c", ((Symbol) ((Tree) child).getTail().getHead()).name);
+        assertEquals("d", ((Symbol) ((Tree) child).getTail().getTail().getHead()).name);
+    }
+
+    @Test
+    public void treeSubtreeDedent() {
+        TreepLexer lexer = new TreepLexer(CharStreams.fromString("a\n\tb c\n\t\td e\n\tf g"));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        TreepParser parser = new TreepParser(tokens);
+        TreepParser.TopLevelTreeContext tree = parser.topLevelTree();
+        Object ast = new ASTBuilder(new SimpleDatumParser(new NameSpace())).visit(tree);
+        assertTrue(ast instanceof Cons);
+        Cons root = (Cons) ast;
+        assertTrue(root.head instanceof Symbol);
+        assertEquals("a", ((Symbol) root.head).name);
+        assertEquals(2, root.tailSize());
+        Object child = root.tail.getHead();
+        assertTrue(child instanceof Tree);
+        assertEquals(2, ((Tree) child).tailSize());
+        assertEquals("b", ((Symbol) ((Tree) child).getHead()).name);
+        assertEquals("c", ((Symbol) ((Tree) child).getTail().getHead()).name);
+    }
+
+    @Test
+    public void treeSubtreeDedentWithLineComment() {
+        TreepLexer lexer = new TreepLexer(CharStreams.fromString("a\n\tb c\n\t\td e #comment\n\tf g"));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        TreepParser parser = new TreepParser(tokens);
+        TreepParser.TopLevelTreeContext tree = parser.topLevelTree();
+        Object ast = new ASTBuilder(new SimpleDatumParser(new NameSpace())).visit(tree);
+        assertTrue(ast instanceof Cons);
+        Cons root = (Cons) ast;
+        assertTrue(root.head instanceof Symbol);
+        assertEquals("a", ((Symbol) root.head).name);
+        assertEquals(2, root.tailSize());
+        Object child = root.tail.getHead();
+        assertTrue(child instanceof Tree);
+        assertEquals(2, ((Tree) child).tailSize());
+        assertEquals("b", ((Symbol) ((Tree) child).getHead()).name);
+        assertEquals("c", ((Symbol) ((Tree) child).getTail().getHead()).name);
+    }
+
+    @Test
+    public void treeSubtreeDedentTemplateWithLineComment() {
+        TreepLexer lexer = new TreepLexer(CharStreams.fromString("a\n\t`b c\n\t\td e #comment\n\tf g"));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        TreepParser parser = new TreepParser(tokens);
+        TreepParser.TopLevelTreeContext tree = parser.topLevelTree();
+        Object ast = new ASTBuilder(new SimpleDatumParser(new NameSpace())).visit(tree);
+        assertTrue(ast instanceof Cons);
+        Cons root = (Cons) ast;
+        assertTrue(root.head instanceof Symbol);
+        assertEquals("a", ((Symbol) root.head).name);
+        assertEquals(2, root.tailSize());
+        Object child = root.tail.getHead();
+        assertTrue(child instanceof Tree);
+        assertEquals(1, ((Tree) child).tailSize());
+        assertEquals("template", ((Symbol) ((Tree) child).getHead()).name);
+    }
+
+    @Test
+    public void treeSubtreeDedentWithSpaces() {
+        TreepLexer lexer = new TreepLexer(CharStreams.fromString("a\n    b c\n        d e\n    f g"));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        TreepParser parser = new TreepParser(tokens);
+        TreepParser.TopLevelTreeContext tree = parser.topLevelTree();
+        Object ast = new ASTBuilder(new SimpleDatumParser(new NameSpace())).visit(tree);
+        assertTrue(ast instanceof Cons);
+        Cons root = (Cons) ast;
+        assertTrue(root.head instanceof Symbol);
+        assertEquals("a", ((Symbol) root.head).name);
+        assertEquals(2, root.tailSize());
+        Object child = root.tail.getHead();
+        assertTrue(child instanceof Tree);
+        assertEquals(2, ((Tree) child).tailSize());
+        assertEquals("b", ((Symbol) ((Tree) child).getHead()).name);
+        assertEquals("c", ((Symbol) ((Tree) child).getTail().getHead()).name);
+    }
+
+    @Test
+    public void treeSubtreeDedentWithSpacesAndLineComment() {
+        TreepLexer lexer = new TreepLexer(CharStreams.fromString("a\n    b c\n        d e #comment\n    f g"));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        TreepParser parser = new TreepParser(tokens);
+        TreepParser.TopLevelTreeContext tree = parser.topLevelTree();
+        Object ast = new ASTBuilder(new SimpleDatumParser(new NameSpace())).visit(tree);
+        assertTrue(ast instanceof Cons);
+        Cons root = (Cons) ast;
+        assertTrue(root.head instanceof Symbol);
+        assertEquals("a", ((Symbol) root.head).name);
+        assertEquals(2, root.tailSize());
+        Object child = root.tail.getHead();
+        assertTrue(child instanceof Tree);
+        assertEquals(2, ((Tree) child).tailSize());
+        assertEquals("b", ((Symbol) ((Tree) child).getHead()).name);
+        assertEquals("c", ((Symbol) ((Tree) child).getTail().getHead()).name);
+    }
+
+    @Test
+    public void treeSubtreeDedentTemplateWithSpacesAndLineComment() {
+        TreepLexer lexer = new TreepLexer(CharStreams.fromString("a\n    `b c\n        d e #comment\n    f g"));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        TreepParser parser = new TreepParser(tokens);
+        TreepParser.TopLevelTreeContext tree = parser.topLevelTree();
+        Object ast = new ASTBuilder(new SimpleDatumParser(new NameSpace())).visit(tree);
+        assertTrue(ast instanceof Cons);
+        Cons root = (Cons) ast;
+        assertTrue(root.head instanceof Symbol);
+        assertEquals("a", ((Symbol) root.head).name);
+        assertEquals(2, root.tailSize());
+        Object child = root.tail.getHead();
+        assertTrue(child instanceof Tree);
+        assertEquals(1, ((Tree) child).tailSize());
+        assertEquals("template", ((Symbol) ((Tree) child).getHead()).name);
     }
 
     @Test

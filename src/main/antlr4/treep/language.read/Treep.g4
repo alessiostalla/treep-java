@@ -56,7 +56,7 @@ node: modifier+=(INSERT | QUOTE | SPLICE_INSERT | TEMPLATE)* (DATUM | list);
 
 LPAREN: '(';
 RPAREN: ')';
-INDENT: NEWLINE (' ' | '\t')*;
+INDENT: (NEWLINE | LINE_COMMENT) (' ' | '\t')*;
 QUOTE: '\'';
 TEMPLATE: '`';
 SPLICE_INSERT: ',@';

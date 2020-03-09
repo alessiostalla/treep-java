@@ -9,4 +9,9 @@ public class Symbol extends Object {
     public Symbol(String name) {
         this.name = name;
     }
+
+    @Override
+    public String toString() {
+        return name;
+    }
 }
