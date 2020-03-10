@@ -26,7 +26,7 @@ These are the key concepts of Treep:
   * a concrete, text-based syntax based on indentation a-la Python but with optional use of parentheses for grouping,
     like Lisp
   * an abstract, structured, object-based syntax tree that can be fully manipulated by user programs and that retains parsing-related metadata (file name, line number, original text and so on)
-* First-class symbols that can model arbitrarily deep name hierarchies such as module:package:class:member
+* First-class symbols that can model arbitrarily deep name hierarchies such as module:namespace:class:member
 * Sensible and useful scoping, namespacing and modularization. Too many languages get these wrong!
 * Immutability by default
   * Bindings are pure functions
