@@ -403,6 +403,21 @@ public class SimpleEvaluatorTest {
     }
 
     @Test
+    public void templateQuoteInsert() {
+        TreepLexer lexer = new TreepLexer(CharStreams.fromString("`',a"));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        TreepParser parser = new TreepParser(tokens);
+        TreepParser.TreeContext tree = parser.tree();
+        ASTBuilder astBuilder = new ASTBuilder(new SimpleDatumParser(Symbols.NAMESPACE_TREEP));
+        Object ast = astBuilder.visit(tree);
+        RealNumber value = new RealNumber(new BigDecimal("1"));
+        Symbol a = Symbols.NAMESPACE_TREEP.intern("a");
+        SimpleEvaluator eval = new SimpleEvaluator();
+        Object quote = eval.eval(ast, eval.getGlobalEnvironment().extendWithConstant(a, value));
+        assertEquals(value, eval.apply(quote));
+    }
+
+    @Test
     public void setUninitialized() {
         TreepLexer lexer = new TreepLexer(CharStreams.fromString("bind ((variable x))\n\tset! x 2\n\tx"));
         CommonTokenStream tokens = new CommonTokenStream(lexer);

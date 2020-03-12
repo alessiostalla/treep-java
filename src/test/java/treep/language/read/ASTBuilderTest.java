@@ -243,4 +243,28 @@ public class ASTBuilderTest {
         assertTrue(((Cons) cons.getTail().getHead()).getHead() instanceof Symbol);
     }
 
+    @Test
+    public void templateQuoteInsert() {
+        TreepLexer lexer = new TreepLexer(CharStreams.fromString("`',x"));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        TreepParser parser = new TreepParser(tokens);
+        TreepParser.TopLevelTreeContext tree = parser.topLevelTree();
+        Object ast = new ASTBuilder(new SimpleDatumParser(new NameSpace())).visit(tree);
+        assertTrue(ast instanceof Cons);
+        Cons cons = (Cons) ast;
+        assertEquals("template", ((Symbol) cons.getHead()).name);
+        Object head = cons.getTail().getHead();
+        assertTrue(head instanceof Cons);
+        cons = ((Cons) head);
+        head = cons.getHead();
+        assertTrue(head instanceof Symbol);
+        assertEquals("quote", ((Symbol) head).name);
+        head = cons.getTail().getHead();
+        assertTrue(head instanceof Cons);
+        cons = ((Cons) head);
+        head = cons.getHead();
+        assertTrue(head instanceof Symbol);
+        assertEquals("insert", ((Symbol) head).name);
+    }
+
 }
