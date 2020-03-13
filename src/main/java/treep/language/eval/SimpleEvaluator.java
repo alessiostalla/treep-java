@@ -495,26 +495,32 @@ public class SimpleEvaluator extends Function {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         SimpleEvaluator eval = new SimpleEvaluator();
         String input = "";
-        try {
-            while (true) {
-                String line = reader.readLine();
-                input += line + lineSeparator;
-                String trim = input.trim();
-                if((line.trim().isEmpty() && !trim.isEmpty()) || trim.startsWith("(") || trim.startsWith("'(")) {
-                    TreepLexer lexer = new TreepLexer(CharStreams.fromString(input));
-                    CommonTokenStream tokens = new CommonTokenStream(lexer);
-                    TreepParser parser = new TreepParser(tokens);
-                    TreepParser.TreeContext tree = parser.topLevelTree().tree();
-                    if(parser.getNumberOfSyntaxErrors() == 0) {
+        while (true) {
+            String line = reader.readLine();
+            input += line + lineSeparator;
+            String trim = input.trim();
+            if((line.trim().isEmpty() && !trim.isEmpty()) || trim.startsWith("(") || trim.startsWith("'(")) {
+                TreepLexer lexer = new TreepLexer(CharStreams.fromString(input));
+                CommonTokenStream tokens = new CommonTokenStream(lexer);
+                TreepParser parser = new TreepParser(tokens);
+                TreepParser.TreeContext tree = parser.topLevelTree().tree();
+                if(parser.getNumberOfSyntaxErrors() == 0) {
+                    try {
                         ASTBuilder astBuilder = new ASTBuilder(new SimpleDatumParser(Symbols.NAMESPACE_TREEP));
                         Object form = astBuilder.visit(tree);
                         Object result = eval.apply(form);
                         System.out.println(result);
-                        input = "";
+                    } catch (EvaluationTerminatedException e) {
+                        break;
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
+                    input = "";
+                } else if(line.trim().isEmpty()) {
+                    input = "";
                 }
-
             }
-        } catch(EvaluationTerminatedException e) {}
+
+        }
     }
 }

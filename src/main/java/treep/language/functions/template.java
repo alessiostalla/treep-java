@@ -40,11 +40,11 @@ public class template extends Function {
             if(elem instanceof Cons) {
                 Cons cons = (Cons) elem;
                 if(cons.head == Symbols.INSERT) {
-                    result = result.append(new Cons(new Cons(Symbols.CONS, new Cons(cons.tail.getHead())))); //TODO check tail is nil
+                    result = result.append(new Cons(new Cons(Symbols.CONS, cons.tail)));
                 } else if(cons.getHead() == Symbols.SPLICE) {
                     result = result.append(cons.tail);
                 } else {
-                    result = result.append(new Cons(processList(cons)));
+                    result = result.append(new Cons(new Cons(Symbols.CONS, new Cons(processList(cons)))));
                 }
             } else {
                 result = result.append(new Cons(new Cons(Symbols.QUOTE, new Cons(new Cons(elem)))));

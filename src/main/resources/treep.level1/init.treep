@@ -3,10 +3,10 @@ set! environment:global
         macro (type name macro:body)
             if (eq type 'constant)
                 `set! environment:global
-                    environment:extend environment:global 'constant ',name ,(head macro:body) #Do no checks here - this is the minimal version
+                    environment:extend environment:global 'constant ',name ,(head macro:body)
                 if (eq type 'variable)
                     `set! environment:global
-                        environment:extend environment:global 'variable ',name ,(head macro:body) #Do no checks here - this is the minimal version
+                        environment:extend environment:global 'variable ',name (variable ,(head macro:body)) #Do no checks here - this is the minimal version
                     if (eq type 'function)
                         `set! environment:global
                             environment:extend environment:global 'function ',name (function ,@macro:body)

@@ -16,4 +16,9 @@ public class RealNumber extends Object {
     public RealNumber plus(RealNumber other) {
         return new RealNumber(value.add(other.value));
     }
+
+    @Override
+    public String toString() {
+        return value.toString();
+    }
 }

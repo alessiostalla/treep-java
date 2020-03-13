@@ -9,11 +9,16 @@ grammar Treep;
 
     int countIndentation(String spaces) {
         int count = 0;
+        boolean newLine = false;
         for(int i = 0; i < spaces.length(); i++) {
-            if(spaces.charAt(i) == ' ') {
-                count++;
-            } else if(spaces.charAt(i) == '\t') {
-                count += 4;
+            if(newLine) {
+                if(spaces.charAt(i) == ' ') {
+                    count++;
+                } else if(spaces.charAt(i) == '\t') {
+                    count += 4;
+                }
+            } else if(spaces.charAt(i) == '\n' || spaces.charAt(i) == '\r') {
+                newLine = true;
             }
         }
         return count;
@@ -62,7 +67,7 @@ TEMPLATE: '`';
 SPLICE_INSERT: ',@';
 INSERT: ',';
 DATUM: (~(' ' | '\t' | '\r' | '\n' | '(' | ')' | '\'' | '`' | ','))+; //TODO escaping (using modes?)
-LINE_COMMENT: ('#' .*? NEWLINE | EOF) -> skip;  //TODO redirect to another channel?
 WS: (' ' | '\t') -> skip;
 
+fragment LINE_COMMENT: '#' .*? NEWLINE;
 fragment NEWLINE: ('\r'? '\n' | '\r');
