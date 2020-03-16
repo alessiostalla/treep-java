@@ -21,7 +21,7 @@ import java.math.BigDecimal;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class SimpleEvaluatorTest {
+public class BootstrapEvaluatorTest {
 
     @Test
     public void symbol() {
@@ -32,14 +32,14 @@ public class SimpleEvaluatorTest {
         ASTBuilder astBuilder = new ASTBuilder(new SimpleDatumParser(Symbols.NAMESPACE_TREEP));
         Object ast = astBuilder.visit(tree);
         try {
-            new SimpleEvaluator().apply(ast);
+            new BootstrapEvaluator().apply(ast);
             fail("Exception expected");
         } catch (RuntimeException e) {
             //Ok
         }
         RealNumber value = new RealNumber(new BigDecimal("1"));
         Symbol a = Symbols.NAMESPACE_TREEP.intern("a");
-        assertEquals(value, new SimpleEvaluator().eval(ast, Environment.empty().extendWithConstant(a, value)));
+        assertEquals(value, new BootstrapEvaluator().eval(ast, Environment.empty().extendWithConstant(a, value)));
     }
 
     @Test
@@ -50,7 +50,7 @@ public class SimpleEvaluatorTest {
         TreepParser.TreeContext tree = parser.tree();
         ASTBuilder astBuilder = new ASTBuilder(new SimpleDatumParser(Symbols.NAMESPACE_TREEP));
         Object ast = astBuilder.visit(tree);
-        Object result = new SimpleEvaluator().apply(ast);
+        Object result = new BootstrapEvaluator().apply(ast);
         assertTrue(result instanceof RealNumber);
         assertEquals(1, ((RealNumber) result).value.intValue());
     }
@@ -65,7 +65,7 @@ public class SimpleEvaluatorTest {
         Object ast = astBuilder.visit(tree);
         assertTrue(ast instanceof Cons);
         try {
-            new SimpleEvaluator().apply(ast);
+            new BootstrapEvaluator().apply(ast);
             fail("Exception expected: function not defined");
         } catch (RuntimeException e) {
             //Ok
@@ -79,7 +79,7 @@ public class SimpleEvaluatorTest {
             }
         });
         try {
-            new SimpleEvaluator().eval(ast, withFunction);
+            new BootstrapEvaluator().eval(ast, withFunction);
             fail("Exception expected: argument not defined");
         } catch (RuntimeException e) {
             //Ok
@@ -89,7 +89,7 @@ public class SimpleEvaluatorTest {
         RealNumber value = new RealNumber(new BigDecimal("1"));
         Environment withValue = withFunction.extendWithConstant(b, value);
 
-        assertEquals(value, new SimpleEvaluator().eval(ast, withValue));
+        assertEquals(value, new BootstrapEvaluator().eval(ast, withValue));
     }
 
     @Test
@@ -100,7 +100,7 @@ public class SimpleEvaluatorTest {
         TreepParser.TopLevelTreeContext tree = parser.topLevelTree();
         ASTBuilder astBuilder = new ASTBuilder(new SimpleDatumParser(Symbols.NAMESPACE_TREEP));
         Object ast = astBuilder.visit(tree);
-        Object object = new SimpleEvaluator().apply(ast);
+        Object object = new BootstrapEvaluator().apply(ast);
         assertTrue(object instanceof Cons);
         assertEquals(Symbols.NAMESPACE_TREEP.intern("a"), ((Cons) object).head);
         assertEquals(Symbols.NAMESPACE_TREEP.intern("b"), ((Cons) object).tail.getHead());
@@ -114,7 +114,7 @@ public class SimpleEvaluatorTest {
         TreepParser.TopLevelTreeContext tree = parser.topLevelTree();
         ASTBuilder astBuilder = new ASTBuilder(new SimpleDatumParser(Symbols.NAMESPACE_TREEP));
         Object ast = astBuilder.visit(tree);
-        Object object = new SimpleEvaluator().apply(ast);
+        Object object = new BootstrapEvaluator().apply(ast);
         assertTrue(object instanceof Cons);
         assertEquals(Symbols.NAMESPACE_TREEP.intern("a"), ((Cons) object).head);
         assertEquals(Symbols.NAMESPACE_TREEP.intern("b"), ((Cons) object).tail.getHead());
@@ -128,7 +128,7 @@ public class SimpleEvaluatorTest {
         TreepParser.TopLevelTreeContext tree = parser.topLevelTree();
         ASTBuilder astBuilder = new ASTBuilder(new SimpleDatumParser(Symbols.NAMESPACE_TREEP));
         Object ast = astBuilder.visit(tree);
-        Object object = new SimpleEvaluator().apply(ast);
+        Object object = new BootstrapEvaluator().apply(ast);
         assertTrue(object instanceof Cons);
         assertEquals(Symbols.NAMESPACE_TREEP.intern("a"), ((Cons) object).head);
         assertEquals(Symbols.NAMESPACE_TREEP.intern("b"), ((Cons) object).tail.getHead());
@@ -143,7 +143,7 @@ public class SimpleEvaluatorTest {
         TreepParser.TreeContext tree = parser.tree();
         ASTBuilder astBuilder = new ASTBuilder(new SimpleDatumParser(Symbols.NAMESPACE_TREEP));
         Object ast = astBuilder.visit(tree);
-        Object object = new SimpleEvaluator().apply(ast);
+        Object object = new BootstrapEvaluator().apply(ast);
         assertTrue(object instanceof Function);
         Object result = ((Function) object).apply();
         assertTrue(result instanceof RealNumber);
@@ -158,7 +158,7 @@ public class SimpleEvaluatorTest {
         TreepParser.TreeContext tree = parser.tree();
         ASTBuilder astBuilder = new ASTBuilder(new SimpleDatumParser(Symbols.NAMESPACE_TREEP));
         Object ast = astBuilder.visit(tree);
-        Object object = new SimpleEvaluator().apply(ast);
+        Object object = new BootstrapEvaluator().apply(ast);
         assertTrue(object instanceof Function);
         Object result = ((Function) object).apply(new RealNumber(new BigDecimal("3")));
         assertTrue(result instanceof RealNumber);
@@ -173,7 +173,7 @@ public class SimpleEvaluatorTest {
         TreepParser.TreeContext tree = parser.tree();
         ASTBuilder astBuilder = new ASTBuilder(new SimpleDatumParser(Symbols.NAMESPACE_TREEP));
         Object ast = astBuilder.visit(tree);
-        Object object = new SimpleEvaluator().apply(ast);
+        Object object = new BootstrapEvaluator().apply(ast);
         assertEquals(Nothing.AT_ALL, object);
     }
 
@@ -185,7 +185,7 @@ public class SimpleEvaluatorTest {
         TreepParser.TreeContext tree = parser.tree();
         ASTBuilder astBuilder = new ASTBuilder(new SimpleDatumParser(Symbols.NAMESPACE_TREEP));
         Object ast = astBuilder.visit(tree);
-        Object object = new SimpleEvaluator().apply(ast);
+        Object object = new BootstrapEvaluator().apply(ast);
         assertTrue(object instanceof RealNumber);
         assertEquals(new BigDecimal("3"), ((RealNumber) object).value);
     }
@@ -198,7 +198,7 @@ public class SimpleEvaluatorTest {
         TreepParser.TreeContext tree = parser.tree();
         ASTBuilder astBuilder = new ASTBuilder(new SimpleDatumParser(Symbols.NAMESPACE_TREEP));
         Object ast = astBuilder.visit(tree);
-        Object object = new SimpleEvaluator().apply(ast);
+        Object object = new BootstrapEvaluator().apply(ast);
         assertTrue(object instanceof Cons);
         assertEquals(Symbols.NAMESPACE_TREEP.intern("a"), ((Cons) object).head);
         assertEquals(Symbols.NAMESPACE_TREEP.intern("b"), ((Cons) object).tail.getHead());
@@ -212,7 +212,7 @@ public class SimpleEvaluatorTest {
         TreepParser.TreeContext tree = parser.tree();
         ASTBuilder astBuilder = new ASTBuilder(new SimpleDatumParser(Symbols.NAMESPACE_TREEP));
         Object ast = astBuilder.visit(tree);
-        Object object = new SimpleEvaluator().apply(ast);
+        Object object = new BootstrapEvaluator().apply(ast);
         assertTrue(object instanceof RealNumber);
         assertEquals(new BigDecimal("3"), ((RealNumber) object).value);
     }
@@ -225,7 +225,7 @@ public class SimpleEvaluatorTest {
         TreepParser.TreeContext tree = parser.tree();
         ASTBuilder astBuilder = new ASTBuilder(new SimpleDatumParser(Symbols.NAMESPACE_TREEP));
         Object ast = astBuilder.visit(tree);
-        Object object = new SimpleEvaluator().apply(ast);
+        Object object = new BootstrapEvaluator().apply(ast);
         assertTrue(object instanceof RealNumber);
         assertEquals(new BigDecimal("3"), ((RealNumber) object).value);
     }
@@ -239,7 +239,7 @@ public class SimpleEvaluatorTest {
         ASTBuilder astBuilder = new ASTBuilder(new SimpleDatumParser(Symbols.NAMESPACE_TREEP));
         Object ast = astBuilder.visit(tree);
         try {
-            new SimpleEvaluator().apply(ast);
+            new BootstrapEvaluator().apply(ast);
             fail("Invalid binding exception expected");
         } catch (Exception e) {
             //Ok
@@ -255,7 +255,7 @@ public class SimpleEvaluatorTest {
         ASTBuilder astBuilder = new ASTBuilder(new SimpleDatumParser(Symbols.NAMESPACE_TREEP));
         Object ast = astBuilder.visit(tree);
         try {
-            new SimpleEvaluator().apply(ast);
+            new BootstrapEvaluator().apply(ast);
             fail("Forbidden binding exception expected");
         } catch (Exception e) {
             //Ok
@@ -270,7 +270,7 @@ public class SimpleEvaluatorTest {
         TreepParser.TreeContext tree = parser.tree();
         ASTBuilder astBuilder = new ASTBuilder(new SimpleDatumParser(Symbols.NAMESPACE_TREEP));
         Object ast = astBuilder.visit(tree);
-        Object object = new SimpleEvaluator().apply(ast);
+        Object object = new BootstrapEvaluator().apply(ast);
         assertTrue(object instanceof Cons);
         Object head = ((Cons) object).head;
         assertTrue(head instanceof Cons);
@@ -289,7 +289,7 @@ public class SimpleEvaluatorTest {
         TreepParser.TreeContext tree = parser.tree();
         ASTBuilder astBuilder = new ASTBuilder(new SimpleDatumParser(Symbols.NAMESPACE_TREEP));
         Object ast = astBuilder.visit(tree);
-        Object object = new SimpleEvaluator().apply(ast);
+        Object object = new BootstrapEvaluator().apply(ast);
         assertTrue(object instanceof RealNumber);
         assertEquals(new BigDecimal("2"), ((RealNumber) object).value);
     }
@@ -302,7 +302,7 @@ public class SimpleEvaluatorTest {
         TreepParser.TreeContext tree = parser.tree();
         ASTBuilder astBuilder = new ASTBuilder(new SimpleDatumParser(Symbols.NAMESPACE_TREEP));
         Object ast = astBuilder.visit(tree);
-        Object object = new SimpleEvaluator().apply(ast);
+        Object object = new BootstrapEvaluator().apply(ast);
         assertTrue(object instanceof RealNumber);
         assertEquals(new BigDecimal("2"), ((RealNumber) object).value);
     }
@@ -315,7 +315,7 @@ public class SimpleEvaluatorTest {
         TreepParser.TreeContext tree = parser.tree();
         ASTBuilder astBuilder = new ASTBuilder(new SimpleDatumParser(Symbols.NAMESPACE_TREEP));
         Object ast = astBuilder.visit(tree);
-        Object object = new SimpleEvaluator().apply(ast);
+        Object object = new BootstrapEvaluator().apply(ast);
         assertTrue(object instanceof RealNumber);
         assertEquals(new BigDecimal("3"), ((RealNumber) object).value);
     }
@@ -328,7 +328,7 @@ public class SimpleEvaluatorTest {
         TreepParser.TreeContext tree = parser.tree();
         ASTBuilder astBuilder = new ASTBuilder(new SimpleDatumParser(Symbols.NAMESPACE_TREEP));
         Object ast = astBuilder.visit(tree);
-        Object object = new SimpleEvaluator().apply(ast);
+        Object object = new BootstrapEvaluator().apply(ast);
         assertTrue(object instanceof RealNumber);
         assertEquals(new BigDecimal("3"), ((RealNumber) object).value);
     }
@@ -342,7 +342,7 @@ public class SimpleEvaluatorTest {
         ASTBuilder astBuilder = new ASTBuilder(new SimpleDatumParser(Symbols.NAMESPACE_TREEP));
         Object ast = astBuilder.visit(tree);
         try {
-            new SimpleEvaluator().apply(ast);
+            new BootstrapEvaluator().apply(ast);
             fail("Exception expected");
         } catch (Exception e) {
             //ignore
@@ -357,7 +357,7 @@ public class SimpleEvaluatorTest {
         TreepParser.TopLevelTreeContext tree = parser.topLevelTree();
         ASTBuilder astBuilder = new ASTBuilder(new SimpleDatumParser(Symbols.NAMESPACE_TREEP));
         Object ast = astBuilder.visit(tree);
-        Object object = new SimpleEvaluator().apply(ast);
+        Object object = new BootstrapEvaluator().apply(ast);
         assertEquals(Symbols.NAMESPACE_TREEP.intern("a"), object);
     }
 
@@ -369,8 +369,8 @@ public class SimpleEvaluatorTest {
         TreepParser.TopLevelTreeContext tree = parser.topLevelTree();
         ASTBuilder astBuilder = new ASTBuilder(new SimpleDatumParser(Symbols.NAMESPACE_TREEP));
         Object ast = astBuilder.visit(tree);
-        Object object = new SimpleEvaluator().apply(ast);
-        object = new SimpleEvaluator().apply(object);
+        Object object = new BootstrapEvaluator().apply(ast);
+        object = new BootstrapEvaluator().apply(object);
         assertEquals(Symbols.NAMESPACE_TREEP.intern("a"), object);
     }
 
@@ -384,7 +384,7 @@ public class SimpleEvaluatorTest {
         Object ast = astBuilder.visit(tree);
         RealNumber value = new RealNumber(new BigDecimal("1"));
         Symbol a = Symbols.NAMESPACE_TREEP.intern("a");
-        SimpleEvaluator eval = new SimpleEvaluator();
+        BootstrapEvaluator eval = new BootstrapEvaluator();
         assertEquals(value, eval.eval(ast, eval.getGlobalEnvironment().extendWithConstant(a, value)));
     }
 
@@ -398,7 +398,7 @@ public class SimpleEvaluatorTest {
         Object ast = astBuilder.visit(tree);
         Cons value = new Cons(new RealNumber(new BigDecimal("1")), new RealNumber(new BigDecimal("2")));
         Symbol a = Symbols.NAMESPACE_TREEP.intern("a");
-        SimpleEvaluator eval = new SimpleEvaluator();
+        BootstrapEvaluator eval = new BootstrapEvaluator();
         assertEquals(value, eval.eval(ast, eval.getGlobalEnvironment().extendWithConstant(a, value)));
     }
 
@@ -412,7 +412,7 @@ public class SimpleEvaluatorTest {
         Object ast = astBuilder.visit(tree);
         RealNumber value = new RealNumber(new BigDecimal("1"));
         Symbol a = Symbols.NAMESPACE_TREEP.intern("a");
-        SimpleEvaluator eval = new SimpleEvaluator();
+        BootstrapEvaluator eval = new BootstrapEvaluator();
         Object quote = eval.eval(ast, eval.getGlobalEnvironment().extendWithConstant(a, value));
         assertEquals(value, eval.apply(quote));
     }
@@ -425,7 +425,7 @@ public class SimpleEvaluatorTest {
         TreepParser.TreeContext tree = parser.tree();
         ASTBuilder astBuilder = new ASTBuilder(new SimpleDatumParser(Symbols.NAMESPACE_TREEP));
         Object ast = astBuilder.visit(tree);
-        Object object = new SimpleEvaluator().apply(ast);
+        Object object = new BootstrapEvaluator().apply(ast);
         assertTrue(object instanceof RealNumber);
         assertEquals(new BigDecimal("2"), ((RealNumber) object).value);
     }
@@ -438,7 +438,7 @@ public class SimpleEvaluatorTest {
         TreepParser.TreeContext tree = parser.tree();
         ASTBuilder astBuilder = new ASTBuilder(new SimpleDatumParser(Symbols.NAMESPACE_TREEP));
         Object ast = astBuilder.visit(tree);
-        Object object = new SimpleEvaluator().apply(ast);
+        Object object = new BootstrapEvaluator().apply(ast);
         assertTrue(object instanceof RealNumber);
         assertEquals(new BigDecimal("2"), ((RealNumber) object).value);
     }

@@ -1,12 +1,12 @@
 package treep.language.datatypes;
 
-import org.pcollections.Empty;
-import org.pcollections.PMap;
-import org.pcollections.PSet;
+import org.pcollections.*;
 import treep.language.Object;
 import treep.language.Symbols;
 import treep.language.datatypes.symbol.Symbol;
 import treep.language.datatypes.tree.Nothing;
+
+import java.util.function.Consumer;
 
 public class Environment extends Object {
 
@@ -25,6 +25,19 @@ public class Environment extends Object {
 
     protected Environment(PMap<Symbol, Object> bindings) {
         this(Nothing.AT_ALL, bindings);
+    }
+
+    protected Environment(Object name, PMap<Symbol, Object> bindings, PSequence<Symbol> newBindings,
+                          java.util.function.Function<Environment, PSequence<Object>> newValues) {
+        PSequence<Object> values = newValues.apply(this); //Note: uninitialized final fields here
+        if(values.size() != bindings.size()) {
+            throw new Error("Bug: bindings don't match with values");
+        }
+        this.name = name;
+        for(int i = 0; i < bindings.size(); i++) {
+            bindings = bindings.plus(newBindings.get(i), values.get(i));
+        }
+        this.bindings = bindings;
     }
 
     public void checkRebindingAllowed(Symbol symbol) {

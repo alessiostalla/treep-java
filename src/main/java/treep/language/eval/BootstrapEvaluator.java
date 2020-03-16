@@ -22,7 +22,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SimpleEvaluator extends Function {
+public class BootstrapEvaluator extends Function {
 
     public Variable globalEnvironment = new Variable(Environment.empty()) {
         @Override
@@ -63,7 +63,7 @@ public class SimpleEvaluator extends Function {
         globalEnvironment.apply(env);
     }
 
-    public SimpleEvaluator() {
+    public BootstrapEvaluator() {
         super(new Cons(Nothing.AT_ALL, new Cons(Nothing.AT_ALL))); //TODO arg names? Optional args?
     }
 
@@ -493,7 +493,7 @@ public class SimpleEvaluator extends Function {
     public static void main(String[] args) throws IOException {
         String lineSeparator = System.lineSeparator();
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-        SimpleEvaluator eval = new SimpleEvaluator();
+        BootstrapEvaluator eval = new BootstrapEvaluator();
         String input = "";
         while (true) {
             String line = reader.readLine();

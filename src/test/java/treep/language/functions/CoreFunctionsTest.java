@@ -1,21 +1,10 @@
 package treep.language.functions;
 
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
 import org.junit.jupiter.api.Test;
 import treep.language.Object;
-import treep.language.Symbols;
-import treep.language.datatypes.Environment;
-import treep.language.datatypes.Function;
-import treep.language.datatypes.symbol.Symbol;
 import treep.language.datatypes.tree.Cons;
 import treep.language.datatypes.tree.Nothing;
 import treep.language.datatypes.tree.Tree;
-import treep.language.eval.SimpleEvaluator;
-import treep.language.read.ASTBuilder;
-import treep.language.read.SimpleDatumParser;
-import treep.language.read.TreepLexer;
-import treep.language.read.TreepParser;
 import treep.math.RealNumber;
 
 import java.math.BigDecimal;
