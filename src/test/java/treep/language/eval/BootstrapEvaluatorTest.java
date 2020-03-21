@@ -166,20 +166,9 @@ public class BootstrapEvaluatorTest {
     }
 
     @Test
-    public void bindEmpty() {
-        TreepLexer lexer = new TreepLexer(CharStreams.fromString("bind ()\n\tnil"));
-        CommonTokenStream tokens = new CommonTokenStream(lexer);
-        TreepParser parser = new TreepParser(tokens);
-        TreepParser.TreeContext tree = parser.tree();
-        ASTBuilder astBuilder = new ASTBuilder(new SimpleDatumParser(Symbols.NAMESPACE_TREEP));
-        Object ast = astBuilder.visit(tree);
-        Object object = new BootstrapEvaluator().apply(ast);
-        assertEquals(Nothing.AT_ALL, object);
-    }
-
-    @Test
     public void bindValue() {
-        TreepLexer lexer = new TreepLexer(CharStreams.fromString("bind ((x 3))\n\tx"));
+        TreepLexer lexer = new TreepLexer(CharStreams.fromString(
+                "with-environment (environment:extend environment:local 'constant 'x 3)\n\tx"));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         TreepParser parser = new TreepParser(tokens);
         TreepParser.TreeContext tree = parser.tree();
@@ -191,8 +180,9 @@ public class BootstrapEvaluatorTest {
     }
 
     @Test
-    public void bindValues() {
-        TreepLexer lexer = new TreepLexer(CharStreams.fromString("bind ((x 'a) (y 'b))\n\tcons x y"));
+    public void bindVariable() {
+        TreepLexer lexer = new TreepLexer(CharStreams.fromString(
+                "with-environment (environment:extend environment:local 'variable 'x (variable 3))\n\tcons x (set! x 4)"));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         TreepParser parser = new TreepParser(tokens);
         TreepParser.TreeContext tree = parser.tree();
@@ -200,26 +190,13 @@ public class BootstrapEvaluatorTest {
         Object ast = astBuilder.visit(tree);
         Object object = new BootstrapEvaluator().apply(ast);
         assertTrue(object instanceof Cons);
-        assertEquals(Symbols.NAMESPACE_TREEP.intern("a"), ((Cons) object).head);
-        assertEquals(Symbols.NAMESPACE_TREEP.intern("b"), ((Cons) object).tail.getHead());
-    }
-
-    @Test
-    public void bindVariable() {
-        TreepLexer lexer = new TreepLexer(CharStreams.fromString("bind ((variable x 3))\n\tx"));
-        CommonTokenStream tokens = new CommonTokenStream(lexer);
-        TreepParser parser = new TreepParser(tokens);
-        TreepParser.TreeContext tree = parser.tree();
-        ASTBuilder astBuilder = new ASTBuilder(new SimpleDatumParser(Symbols.NAMESPACE_TREEP));
-        Object ast = astBuilder.visit(tree);
-        Object object = new BootstrapEvaluator().apply(ast);
-        assertTrue(object instanceof RealNumber);
-        assertEquals(new BigDecimal("3"), ((RealNumber) object).value);
+        assertEquals(new BigDecimal("3"), ((RealNumber) ((Cons) object).getHead()).value);
+        assertEquals(new BigDecimal("4"), ((RealNumber) ((Cons) object).getTail().getHead()).value);
     }
 
     @Test
     public void bindFunction() {
-        TreepLexer lexer = new TreepLexer(CharStreams.fromString("bind ((function f (x) x))\n\tf 3"));
+        TreepLexer lexer = new TreepLexer(CharStreams.fromString("with-environment (environment:extend environment:local 'function 'f (function (x) x))\n\tf 3"));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         TreepParser parser = new TreepParser(tokens);
         TreepParser.TreeContext tree = parser.tree();
@@ -264,7 +241,8 @@ public class BootstrapEvaluatorTest {
 
     @Test
     public void bindMacro() {
-        TreepLexer lexer = new TreepLexer(CharStreams.fromString("bind ((macro m (x macro:body) (cons 'cons (cons macro:body (cons x)))))\n\tm 4 cons 3"));
+        TreepLexer lexer = new TreepLexer(CharStreams.fromString(
+                "with-environment (environment:extend environment:local 'macro 'm (macro (x macro:body) `(,@macro:body ,x)))\n\tm 4 cons 3"));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         TreepParser parser = new TreepParser(tokens);
         TreepParser.TreeContext tree = parser.tree();
@@ -273,10 +251,6 @@ public class BootstrapEvaluatorTest {
         Object object = new BootstrapEvaluator().apply(ast);
         assertTrue(object instanceof Cons);
         Object head = ((Cons) object).head;
-        assertTrue(head instanceof Cons);
-        head = ((Cons) object).head;
-        assertTrue(head instanceof Cons);
-        head = ((Cons) head).getHead();
         assertTrue(head instanceof RealNumber);
         assertEquals(new BigDecimal("3"), ((RealNumber) head).value);
     }
@@ -415,32 +389,6 @@ public class BootstrapEvaluatorTest {
         BootstrapEvaluator eval = new BootstrapEvaluator();
         Object quote = eval.eval(ast, eval.getGlobalEnvironment().extendWithConstant(a, value));
         assertEquals(value, eval.apply(quote));
-    }
-
-    @Test
-    public void setUninitialized() {
-        TreepLexer lexer = new TreepLexer(CharStreams.fromString("bind ((variable x))\n\tset! x 2\n\tx"));
-        CommonTokenStream tokens = new CommonTokenStream(lexer);
-        TreepParser parser = new TreepParser(tokens);
-        TreepParser.TreeContext tree = parser.tree();
-        ASTBuilder astBuilder = new ASTBuilder(new SimpleDatumParser(Symbols.NAMESPACE_TREEP));
-        Object ast = astBuilder.visit(tree);
-        Object object = new BootstrapEvaluator().apply(ast);
-        assertTrue(object instanceof RealNumber);
-        assertEquals(new BigDecimal("2"), ((RealNumber) object).value);
-    }
-
-    @Test
-    public void setInitialized() {
-        TreepLexer lexer = new TreepLexer(CharStreams.fromString("bind ((variable x 1))\n\tset! x 2\n\tx"));
-        CommonTokenStream tokens = new CommonTokenStream(lexer);
-        TreepParser parser = new TreepParser(tokens);
-        TreepParser.TreeContext tree = parser.tree();
-        ASTBuilder astBuilder = new ASTBuilder(new SimpleDatumParser(Symbols.NAMESPACE_TREEP));
-        Object ast = astBuilder.visit(tree);
-        Object object = new BootstrapEvaluator().apply(ast);
-        assertTrue(object instanceof RealNumber);
-        assertEquals(new BigDecimal("2"), ((RealNumber) object).value);
     }
 
 }

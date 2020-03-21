@@ -3,7 +3,7 @@ set! environment:global
         macro (type name macro:body)
             if (eq type 'constant)
                 `set! environment:global
-                    environment:extend environment:global 'constant ',name ,(head macro:body)
+                    environment:extend environment:global 'constant ',name ,(head macro:body) #Do no checks here - this is the minimal version
                 if (eq type 'variable)
                     `set! environment:global
                         environment:extend environment:global 'variable ',name (variable ,(head macro:body)) #Do no checks here - this is the minimal version
@@ -14,3 +14,6 @@ set! environment:global
                             `set! environment:global
                                 environment:extend environment:global 'macro ',name (macro ,@macro:body)
                             error 'unsupported-definition
+
+def macro bind (bindings macro:body)
+  `(,@macro:body) #todo

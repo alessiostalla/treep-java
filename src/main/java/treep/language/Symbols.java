@@ -37,4 +37,5 @@ public class Symbols {
     public static final Symbol TAIL = NAMESPACE_TREEP.intern("tail");
     public static final Symbol TEMPLATE = NAMESPACE_TREEP.intern("template");
     public static final Symbol VARIABLE = NAMESPACE_TREEP.intern("variable");
+    public static final Symbol WITH_ENVIRONMENT = NAMESPACE_TREEP.intern("with-environment");
 }

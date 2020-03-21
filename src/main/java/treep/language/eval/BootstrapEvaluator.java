@@ -37,10 +37,11 @@ public class BootstrapEvaluator extends Function {
         Environment env = getGlobalEnvironment();
         env = env.extendWithFunction(Symbols.APPEND, new append());
         env = env.extendWithFunction(Symbols.APPLY, new apply());
-        env = env.extendWithOperator(Symbols.BIND, new bind());
         env = env.extendWithFunction(Symbols.CONS, new cons());
         env = env.extendWithFunction(Symbols.CONSTANT, new constant());
         env = env.extendWithFunction(Symbols.ENVIRONMENT_EXTEND, new environment_extend());
+        env = env.extendWithVariable(Symbols.ENVIRONMENT_GLOBAL, globalEnvironment);
+        //Note: ENVIRONMENT_LOCAL is bound by the environment itself
         env = env.extendWithFunction(Symbols.EVAL, this);
         env = env.extendWithFunction(Symbols.EQ, new eq());
         env = env.extendWithFunction(Symbols.ERROR, new error());
@@ -58,8 +59,8 @@ public class BootstrapEvaluator extends Function {
         env = env.extendWithConstant(Symbols.T, Symbols.T);
         env = env.extendWithFunction(Symbols.TAIL, new tail());
         env = env.extendWithOperator(Symbols.TEMPLATE, new Macro(new template()));
-        env = env.extendWithVariable(Symbols.ENVIRONMENT_GLOBAL, globalEnvironment);
         env = env.extendWithFunction(Symbols.VARIABLE, new variable());
+        env = env.extendWithOperator(Symbols.WITH_ENVIRONMENT, new with_environment());
         globalEnvironment.apply(env);
     }
 
@@ -67,12 +68,12 @@ public class BootstrapEvaluator extends Function {
         super(new Cons(Nothing.AT_ALL, new Cons(Nothing.AT_ALL))); //TODO arg names? Optional args?
     }
 
-    public Object apply(Object expression) {
-        return eval(expression, getGlobalEnvironment());
-    }
-
     public Environment getGlobalEnvironment() {
         return (Environment) globalEnvironment.apply();
+    }
+
+    public Object apply(Object expression) {
+        return eval(expression, getGlobalEnvironment());
     }
 
     public Object apply(Object expression, Object environment) {
@@ -136,6 +137,13 @@ public class BootstrapEvaluator extends Function {
         return function.apply(arguments.toArray(new Object[0]));
     }
 
+    protected final Function evalBody = new Function(Nothing.AT_ALL) { //TODO
+        @Override
+        public Object apply(Object body, Object environment) {
+            return evalBody((Tree) body, (Environment) environment);
+        }
+    };
+
     public Function makeFunction(Tree definition, Environment environment) {
         if (definition.getTail() == Nothing.AT_ALL) {
             Object nameOrFunction = definition.getHead();
@@ -155,11 +163,11 @@ public class BootstrapEvaluator extends Function {
                 Tree args = (Tree) arglist;
                 if (args.getHead() == Nothing.AT_ALL) {
                     //TODO check tail is empty too
-                    return new InterpretedFunction0(args, body, environment, this);
+                    return new InterpretedFunction0(args, body, environment, evalBody);
                 } else if (args.getTail() == Nothing.AT_ALL) {
-                    return new InterpretedFunction1(args, body, environment, this, (Symbol) args.getHead()); //TODO check
+                    return new InterpretedFunction1(args, body, environment, evalBody, (Symbol) args.getHead()); //TODO check
                 } else { //TODO other cases
-                    return new InterpretedFunctionN(args, body, environment, this, (Cons) arglist); //TODO check
+                    return new InterpretedFunctionN(args, body, environment, evalBody, (Cons) arglist); //TODO check
                 }
             } else {
                 throw new IllegalArgumentException("Not an arguments list: " + arglist); //TODO
@@ -222,7 +230,7 @@ public class BootstrapEvaluator extends Function {
 
         public InterpretedFunction(Tree arglist, Tree body, Environment environment, Function evaluator) {
             super(arglist, environment);
-            this.body = new Cons(Symbols.BIND, new Cons(Nothing.AT_ALL, body));
+            this.body = (Object) body;
             this.evaluator = evaluator;
         }
     }
@@ -286,57 +294,17 @@ public class BootstrapEvaluator extends Function {
         return result;
     }
 
-    public class bind extends Operator {
+    public class with_environment extends Operator {
+
         @Override
         public Object apply(Tree form, Environment environment) {
-            Environment original = environment;
-            Object bindings = form.getTail().getHead();
-            if (!(bindings instanceof Tree)) {
-                throw new IllegalArgumentException("Invalid bindings: " + bindings); //TODO
-            }
-            Tree bindingsTree = (Tree) bindings;
-            while (bindingsTree != Nothing.AT_ALL) {
-                Object binding = bindingsTree.getHead();
-                if(binding instanceof Cons) {
-                    Cons theBinding = (Cons) binding;
-                    Object head = theBinding.head;
-                    if(!(head instanceof Symbol)) {
-                        throw new IllegalArgumentException("Invalid binding: " + binding); //TODO
-                    }
-                    if(head == Symbols.FUNCTION) {
-                        Object name = theBinding.tail.getHead();
-                        if(!(name instanceof Symbol)) {
-                            throw new IllegalArgumentException("Not a symbol: " + name); //TODO
-                        }
-                        Tree definition = theBinding.tail.getTail();
-                        Function function = makeFunction(definition, environment);
-                        environment = environment.extendWithFunction((Symbol) name, function);
-                    } else if(head == Symbols.MACRO) {
-                        Object name = theBinding.tail.getHead();
-                        if(!(name instanceof Symbol)) {
-                            throw new IllegalArgumentException("Not a symbol: " + name); //TODO
-                        }
-                        Tree definition = theBinding.tail.getTail();
-                        Function function = makeFunction(definition, environment);
-                        environment = environment.extendWithOperator((Symbol) name, new Macro(function));
-                    } else if(head == Symbols.VARIABLE) {
-                        Object name = theBinding.tail.getHead();
-                        if(!(name instanceof Symbol)) {
-                            throw new IllegalArgumentException("Not a symbol: " + name); //TODO
-                        }
-                        Object value = theBinding.tail.getTail().getHead();
-                        environment = environment.extendWithFunction((Symbol) name, new Variable(value));
-                    } else {
-                        Object value = eval(theBinding.tail.getHead(), original);
-                        environment = environment.extendWithConstant((Symbol) head, value);
-                    }
-                } else {
-                    throw new IllegalArgumentException("Invalid binding: " + binding); //TODO
-                }
-                bindingsTree = bindingsTree.getTail();
+            Object newEnvForm = form.getTail().getHead();
+            Object newEnv = eval(newEnvForm, environment);
+            if(!(newEnv instanceof Environment)) {
+                throw new IllegalArgumentException("Not an environment: " + environment); //TODO
             }
             Tree body = form.getTail().getTail();
-            return evalBody(body, environment);
+            return evalBody(body, (Environment) newEnv);
         }
     }
 
