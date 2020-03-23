@@ -1,19 +1,44 @@
 set! environment:global
-    environment:extend environment:global 'macro 'def
-        macro (type name macro:body)
-            if (eq type 'constant)
+  environment:extend environment:global 'macro 'def
+    macro (type name macro:body)
+      `do
+        ,if (eq type 'constant)
+          `set! environment:global
+            environment:extend environment:global 'constant ',name ,(head macro:body) #Do no checks here - this is the minimal version
+          if (eq type 'variable)
+            `set! environment:global
+              environment:extend environment:global 'variable ',name (variable ,(head macro:body)) #Do no checks here - this is the minimal version
+            if (eq type 'function)
+              `set! environment:global
+                environment:extend environment:global 'function ',name (function ,@macro:body)
+              if (eq type 'macro)
                 `set! environment:global
-                    environment:extend environment:global 'constant ',name ,(head macro:body) #Do no checks here - this is the minimal version
-                if (eq type 'variable)
-                    `set! environment:global
-                        environment:extend environment:global 'variable ',name (variable ,(head macro:body)) #Do no checks here - this is the minimal version
-                    if (eq type 'function)
-                        `set! environment:global
-                            environment:extend environment:global 'function ',name (function ,@macro:body)
-                        if (eq type 'macro)
-                            `set! environment:global
-                                environment:extend environment:global 'macro ',name (macro ,@macro:body)
-                            error 'unsupported-definition
+                  environment:extend environment:global 'macro ',name (macro ,@macro:body)
+                error 'unsupported-definition
+        `',name
+
+def function null? (x)
+  eq x nil
+
+def function cons:map ((function f) tree)
+  if (null? tree) nil (cons (f (tree:head tree)) (cons:map (tree:tail tree)))
+
+def function tree:first (tree)
+  cons:head tree
+
+def function tree:second (tree)
+  cons:head (cons:tail tree)
+
+def function tree:third (tree)
+  cons:head (cons:tail (cons:tail tree))
 
 def macro bind (bindings macro:body)
-  `(,@macro:body) #todo
+  if (null? bindings)
+    `(do ,@macro-body)
+    #Do no checks here - this is the minimal version
+    if (eq 'constant (tree:first (tree:first bindings)))
+      `with-environment (environment:extend environment:local
+                           'constant ',(tree:second (tree:first bindings))
+                            ,(tree:third (tree:first bindings)))
+        (bind ,@(cons:tail bindings) ,@macro:body)
+      error 'unsupported-binding

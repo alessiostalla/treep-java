@@ -2,11 +2,7 @@ package treep.language.functions;
 
 import treep.language.Object;
 import treep.language.Symbols;
-import treep.language.datatypes.Environment;
 import treep.language.datatypes.Function;
-import treep.language.datatypes.Macro;
-import treep.language.datatypes.Operator;
-import treep.language.datatypes.symbol.Symbol;
 import treep.language.datatypes.tree.Cons;
 import treep.language.datatypes.tree.Nothing;
 import treep.language.datatypes.tree.Tree;
@@ -21,9 +17,9 @@ public class template extends Function {
     public Object apply(Object tree) {
         if(tree instanceof Cons) {
             Cons theTree = (Cons) tree;
-            if(theTree.getHead() == Symbols.INSERT) {
+            if(theTree.getHead() == Symbols.TEMPLATE_INSERT) {
                 return theTree.getTail().getHead(); //TODO check tail is nil
-            } else if(theTree.getHead() == Symbols.SPLICE) {
+            } else if(theTree.getHead() == Symbols.TEMPLATE_SPLICE) {
                 throw new IllegalArgumentException("Splice (,@) outside of a list context"); //TODO
             }
             return processList((Tree) tree);
@@ -39,9 +35,9 @@ public class template extends Function {
             Object elem = theTree.getHead();
             if(elem instanceof Cons) {
                 Cons cons = (Cons) elem;
-                if(cons.head == Symbols.INSERT) {
+                if(cons.head == Symbols.TEMPLATE_INSERT) {
                     result = result.append(new Cons(new Cons(Symbols.CONS, cons.tail)));
-                } else if(cons.getHead() == Symbols.SPLICE) {
+                } else if(cons.getHead() == Symbols.TEMPLATE_SPLICE) {
                     result = result.append(cons.tail);
                 } else {
                     result = result.append(new Cons(new Cons(Symbols.CONS, new Cons(processList(cons)))));

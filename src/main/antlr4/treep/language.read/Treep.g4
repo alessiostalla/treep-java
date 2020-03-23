@@ -9,16 +9,12 @@ grammar Treep;
 
     int countIndentation(String spaces) {
         int count = 0;
-        boolean newLine = false;
-        for(int i = 0; i < spaces.length(); i++) {
-            if(newLine) {
-                if(spaces.charAt(i) == ' ') {
-                    count++;
-                } else if(spaces.charAt(i) == '\t') {
-                    count += 4;
-                }
-            } else if(spaces.charAt(i) == '\n' || spaces.charAt(i) == '\r') {
-                newLine = true;
+        int start = Math.max(spaces.lastIndexOf('\r'), spaces.lastIndexOf('\n'));
+        for(int i = start + 1; i < spaces.length(); i++) {
+            if(spaces.charAt(i) == ' ') {
+                count++;
+            } else if(spaces.charAt(i) == '\t') {
+                count += 4;
             }
         }
         return count;
@@ -61,7 +57,7 @@ node: modifier+=(INSERT | QUOTE | SPLICE_INSERT | TEMPLATE)* (DATUM | list);
 
 LPAREN: '(';
 RPAREN: ')';
-INDENT: (NEWLINE | LINE_COMMENT) (' ' | '\t')*;
+INDENT: EMPTY_LINE+ (' ' | '\t')*;
 QUOTE: '\'';
 TEMPLATE: '`';
 SPLICE_INSERT: ',@';
@@ -69,5 +65,6 @@ INSERT: ',';
 DATUM: (~(' ' | '\t' | '\r' | '\n' | '(' | ')' | '\'' | '`' | ','))+; //TODO escaping (using modes?)
 WS: (' ' | '\t') -> skip;
 
+fragment EMPTY_LINE: ((' ' | '\t')* (NEWLINE | LINE_COMMENT)+)+;
 fragment LINE_COMMENT: '#' .*? NEWLINE;
 fragment NEWLINE: ('\r'? '\n' | '\r');

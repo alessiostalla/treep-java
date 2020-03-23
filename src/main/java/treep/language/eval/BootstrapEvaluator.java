@@ -38,7 +38,10 @@ public class BootstrapEvaluator extends Function {
         env = env.extendWithFunction(Symbols.APPEND, new append());
         env = env.extendWithFunction(Symbols.APPLY, new apply());
         env = env.extendWithFunction(Symbols.CONS, new cons());
+        env = env.extendWithFunction(Symbols.CONS_HEAD, new head());
+        env = env.extendWithFunction(Symbols.CONS_TAIL, new tail());
         env = env.extendWithFunction(Symbols.CONSTANT, new constant());
+        env = env.extendWithOperator(Symbols.DO, new doOperator());
         env = env.extendWithFunction(Symbols.ENVIRONMENT_EXTEND, new environment_extend());
         env = env.extendWithVariable(Symbols.ENVIRONMENT_GLOBAL, globalEnvironment);
         //Note: ENVIRONMENT_LOCAL is bound by the environment itself
@@ -46,7 +49,6 @@ public class BootstrapEvaluator extends Function {
         env = env.extendWithFunction(Symbols.EQ, new eq());
         env = env.extendWithFunction(Symbols.ERROR, new error());
         env = env.extendWithOperator(Symbols.FUNCTION, new function());
-        env = env.extendWithFunction(Symbols.HEAD, new head());
         env = env.extendWithOperator(Symbols.IF, new ifOperator());
         env = env.extendWithOperator(Symbols.LOOP, new loop());
         env = env.extendWithOperator(Symbols.MACRO, new macro());
@@ -57,7 +59,6 @@ public class BootstrapEvaluator extends Function {
         env = env.extendWithOperator(Symbols.QUOTE, new quote());
         env = env.extendWithOperator(Symbols.SET, new set());
         env = env.extendWithConstant(Symbols.T, Symbols.T);
-        env = env.extendWithFunction(Symbols.TAIL, new tail());
         env = env.extendWithOperator(Symbols.TEMPLATE, new Macro(new template()));
         env = env.extendWithFunction(Symbols.VARIABLE, new variable());
         env = env.extendWithOperator(Symbols.WITH_ENVIRONMENT, new with_environment());
@@ -337,6 +338,13 @@ public class BootstrapEvaluator extends Function {
             //TODO support return-from
             Object value = form.getTail().getHead();
             throw new returnFromBlock(Nothing.AT_ALL, eval(value, environment));
+        }
+    }
+
+    public class doOperator extends Operator {
+        @Override
+        public Object apply(Tree form, Environment environment) {
+            return evalBody(form.getTail(), environment);
         }
     }
 

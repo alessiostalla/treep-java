@@ -264,7 +264,7 @@ public class ASTBuilderTest {
         cons = ((Cons) head);
         head = cons.getHead();
         assertTrue(head instanceof Symbol);
-        assertEquals("insert", ((Symbol) head).name);
+        assertEquals("template:insert", ((Symbol) head).name);
     }
 
 }
