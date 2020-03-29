@@ -15,7 +15,7 @@ set! environment:global
                 `set! environment:global
                   environment:extend environment:global 'macro ',name (macro ,@macro:body)
                 error 'unsupported-definition
-        `',name
+        `,name
 
 def function null? (x)
   eq x nil
@@ -34,11 +34,11 @@ def function tree:third (tree)
 
 def macro bind (bindings macro:body)
   if (null? bindings)
-    `(do ,@macro-body)
+    `(do ,@macro:body)
     #Do no checks here - this is the minimal version
     if (eq 'constant (tree:first (tree:first bindings)))
       `with-environment (environment:extend environment:local
                            'constant ',(tree:second (tree:first bindings))
                             ,(tree:third (tree:first bindings)))
-        (bind ,@(cons:tail bindings) ,@macro:body)
+        (bind ,(cons:tail bindings) ,@macro:body)
       error 'unsupported-binding

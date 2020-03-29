@@ -471,8 +471,12 @@ public class BootstrapEvaluator extends Function {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         BootstrapEvaluator eval = new BootstrapEvaluator();
         String input = "";
+        System.out.print("treep> ");
         while (true) {
             String line = reader.readLine();
+            if(line == null) {
+                break;
+            }
             input += line + lineSeparator;
             String trim = input.trim();
             if((line.trim().isEmpty() && !trim.isEmpty()) || trim.startsWith("(") || trim.startsWith("'(")) {
@@ -492,8 +496,10 @@ public class BootstrapEvaluator extends Function {
                         e.printStackTrace();
                     }
                     input = "";
+                    System.out.print("treep> ");
                 } else if(line.trim().isEmpty()) {
                     input = "";
+                    System.out.print("treep> ");
                 }
             }
 
