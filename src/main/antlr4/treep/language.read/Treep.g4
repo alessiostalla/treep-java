@@ -65,6 +65,6 @@ INSERT: ',';
 DATUM: (~(' ' | '\t' | '\r' | '\n' | '(' | ')' | '\'' | '`' | ','))+; //TODO escaping (using modes?)
 WS: (' ' | '\t') -> skip;
 
-fragment EMPTY_LINE: ((' ' | '\t')* (NEWLINE | LINE_COMMENT)+)+;
-fragment LINE_COMMENT: '#' .*? NEWLINE;
-fragment NEWLINE: ('\r'? '\n' | '\r');
+fragment EMPTY_LINE: ((' ' | '\t' | NEWLINE)* (NEWLINE | LINE_COMMENT)+)+;
+fragment LINE_COMMENT: '#' .*? NEWLINE+;
+fragment NEWLINE: '\r' |'\n';

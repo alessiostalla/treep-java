@@ -51,6 +51,7 @@ public class BootstrapEvaluator extends Function {
         env = env.extendWithOperator(Symbols.FUNCTION, new function());
         env = env.extendWithOperator(Symbols.IF, new ifOperator());
         env = env.extendWithOperator(Symbols.LOOP, new loop());
+        env = env.extendWithConstant(Symbols.LOWERCASE_T, Symbols.T);
         env = env.extendWithOperator(Symbols.MACRO, new macro());
         env = env.extendWithFunction(Symbols.MACRO_EXPAND, new macro_expand());
         env = env.extendWithConstant(Symbols.NIL, Nothing.AT_ALL);

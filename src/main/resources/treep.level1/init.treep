@@ -20,6 +20,9 @@ set! environment:global
 def function null? (x)
   eq x nil
 
+def function not (x)
+  if x nil t
+
 def function cons:map ((function f) tree)
   if (null? tree) nil (cons (f (tree:head tree)) (cons:map (tree:tail tree)))
 
@@ -32,13 +35,26 @@ def function tree:second (tree)
 def function tree:third (tree)
   cons:head (cons:tail (cons:tail tree))
 
-def macro bind (bindings macro:body)
+def macro cond (macro:body)
+  if (not (null? macro:body))
+    `(if ,(cons:head (cons:head macro:body))
+        (do ,@(cons:tail (cons:head macro:body)))
+        (cond ,@(cons:tail macro:body)))
+
+def macro let (bindings macro:body)
   if (null? bindings)
     `(do ,@macro:body)
     #Do no checks here - this is the minimal version
-    if (eq 'constant (tree:first (tree:first bindings)))
-      `with-environment (environment:extend environment:local
-                           'constant ',(tree:second (tree:first bindings))
-                            ,(tree:third (tree:first bindings)))
-        (bind ,(cons:tail bindings) ,@macro:body)
-      error 'unsupported-binding
+    cond
+      (eq 'constant (tree:first (tree:first bindings)))
+        `with-environment (environment:extend environment:local
+                             'constant ',(tree:second (tree:first bindings))
+                             ,(tree:third (tree:first bindings)))
+          (let ,(cons:tail bindings) ,@macro:body)
+      (eq 'variable (tree:first (tree:first bindings)))
+        `with-environment (environment:extend environment:local
+                             'variable ',(tree:second (tree:first bindings))
+                             (variable ,(tree:third (tree:first bindings))))
+          (let ,(cons:tail bindings) ,@macro:body)
+      t error 'unsupported-binding
+
