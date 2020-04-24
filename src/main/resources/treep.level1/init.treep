@@ -42,19 +42,29 @@ def macro cond (macro:body)
         (cond ,@(cons:tail macro:body)))
 
 def macro let (bindings macro:body)
-  if (null? bindings)
-    `(do ,@macro:body)
-    #Do no checks here - this is the minimal version
-    cond
-      (eq 'constant (tree:first (tree:first bindings)))
-        `with-environment (environment:extend environment:local
-                             'constant ',(tree:second (tree:first bindings))
-                             ,(tree:third (tree:first bindings)))
-          (let ,(cons:tail bindings) ,@macro:body)
-      (eq 'variable (tree:first (tree:first bindings)))
-        `with-environment (environment:extend environment:local
-                             'variable ',(tree:second (tree:first bindings))
-                             (variable ,(tree:third (tree:first bindings))))
-          (let ,(cons:tail bindings) ,@macro:body)
-      t error 'unsupported-binding
+  #Do no checks here - this is the minimal version
+  cond
+    (null? bindings)
+      `(do ,@macro:body)
+    (eq 'constant (tree:first (tree:first bindings)))
+      `with-environment (environment:extend environment:local
+                         'constant ',(tree:second (tree:first bindings))
+                         ,(tree:third (tree:first bindings)))
+        (let ,(cons:tail bindings) ,@macro:body)
+    (eq 'variable (tree:first (tree:first bindings)))
+      `with-environment (environment:extend environment:local
+                         'variable ',(tree:second (tree:first bindings))
+                         (variable ,(tree:third (tree:first bindings))))
+        (let ,(cons:tail bindings) ,@macro:body)
+    (eq 'function (tree:first (tree:first bindings)))
+      `with-environment (environment:extend environment:local
+                         'function ',(tree:second (tree:first bindings))
+                         (function ,@(cons:tail (cons:tail (tree:first bindings)))))
+        (let ,(cons:tail bindings) ,@macro:body)
+    (eq 'macro (tree:first (tree:first bindings)))
+      `with-environment (environment:extend environment:local
+                         'macro ',(tree:second (tree:first bindings))
+                         (macro ,@(cons:tail (cons:tail (tree:first bindings)))))
+        (let ,(cons:tail bindings) ,@macro:body)
+    t error 'unsupported-binding
 

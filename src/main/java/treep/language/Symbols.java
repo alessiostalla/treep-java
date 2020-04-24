@@ -32,6 +32,7 @@ public class Symbols {
     public static final Symbol QUOTE = NAMESPACE_TREEP.intern("quote");
     public static final Symbol RETURN = NAMESPACE_TREEP.intern("return");
     public static final Symbol SET = NAMESPACE_TREEP.intern("set!");
+    public static final Symbol SOURCE_TEXT = NAMESPACE_TREEP.intern("source-text");
     public static final Symbol T = NAMESPACE_TREEP.intern("T");
     public static final Symbol LOWERCASE_T = NAMESPACE_TREEP.intern("t"); //alias
     public static final Symbol TEMPLATE = NAMESPACE_TREEP.intern("template");

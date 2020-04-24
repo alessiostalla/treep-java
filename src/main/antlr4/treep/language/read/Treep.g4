@@ -63,7 +63,7 @@ TEMPLATE: '`';
 SPLICE_INSERT: ',@';
 INSERT: ',';
 DATUM: (~(' ' | '\t' | '\r' | '\n' | '(' | ')' | '\'' | '`' | ','))+; //TODO escaping (using modes?)
-WS: (' ' | '\t') -> skip;
+WS: (' ' | '\t') -> channel(HIDDEN);
 
 fragment EMPTY_LINE: ((' ' | '\t' | NEWLINE)* (NEWLINE | LINE_COMMENT)+)+;
 fragment LINE_COMMENT: '#' .*? NEWLINE+;

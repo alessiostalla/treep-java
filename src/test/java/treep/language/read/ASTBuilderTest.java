@@ -4,6 +4,8 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.junit.jupiter.api.Test;
 import treep.language.Object;
+import treep.language.Symbols;
+import treep.language.datatypes.String;
 import treep.language.datatypes.symbol.NameSpace;
 import treep.language.datatypes.symbol.Symbol;
 import treep.language.datatypes.tree.Cons;
@@ -67,13 +69,17 @@ public class ASTBuilderTest {
 
     @Test
     public void treeTwoChildren() {
-        TreepLexer lexer = new TreepLexer(CharStreams.fromString("a b c"));
+        java.lang.String expr = "a b c";
+        TreepLexer lexer = new TreepLexer(CharStreams.fromString(expr));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         TreepParser parser = new TreepParser(tokens);
         TreepParser.TopLevelTreeContext tree = parser.topLevelTree();
         Object ast = new ASTBuilder(new SimpleDatumParser(new NameSpace())).visit(tree);
         assertTrue(ast instanceof Cons);
         Cons root = (Cons) ast;
+        Object sourceText = root.metadata.get(Symbols.SOURCE_TEXT);
+        assertTrue(sourceText instanceof String);
+        assertEquals(expr, ((String) sourceText).string);
         assertTrue(root.head instanceof Symbol);
         assertEquals("a", ((Symbol) root.head).name);
         assertEquals(2, root.tailSize());
@@ -87,13 +93,17 @@ public class ASTBuilderTest {
 
     @Test
     public void treeSubtree() {
-        TreepLexer lexer = new TreepLexer(CharStreams.fromString("a\n\tb c d"));
+        java.lang.String expr = "a\n\tb c d";
+        TreepLexer lexer = new TreepLexer(CharStreams.fromString(expr));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         TreepParser parser = new TreepParser(tokens);
         TreepParser.TopLevelTreeContext tree = parser.topLevelTree();
         Object ast = new ASTBuilder(new SimpleDatumParser(new NameSpace())).visit(tree);
         assertTrue(ast instanceof Cons);
         Cons root = (Cons) ast;
+        Object sourceText = root.metadata.get(Symbols.SOURCE_TEXT);
+        assertTrue(sourceText instanceof String);
+        assertEquals(expr, ((String) sourceText).string);
         assertTrue(root.head instanceof Symbol);
         assertEquals("a", ((Symbol) root.head).name);
         assertEquals(1, root.tailSize());
@@ -126,13 +136,17 @@ public class ASTBuilderTest {
 
     @Test
     public void treeSubtreeDedentWithLineComment() {
-        TreepLexer lexer = new TreepLexer(CharStreams.fromString("a\n\tb c\n\t\td e #comment\n\tf g"));
+        java.lang.String expr = "a\n\tb c\n\t\td e #comment\n\tf g";
+        TreepLexer lexer = new TreepLexer(CharStreams.fromString(expr));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         TreepParser parser = new TreepParser(tokens);
         TreepParser.TopLevelTreeContext tree = parser.topLevelTree();
         Object ast = new ASTBuilder(new SimpleDatumParser(new NameSpace())).visit(tree);
         assertTrue(ast instanceof Cons);
         Cons root = (Cons) ast;
+        Object sourceText = root.metadata.get(Symbols.SOURCE_TEXT);
+        assertTrue(sourceText instanceof String);
+        assertEquals(expr, ((String) sourceText).string);
         assertTrue(root.head instanceof Symbol);
         assertEquals("a", ((Symbol) root.head).name);
         assertEquals(2, root.tailSize());
@@ -245,13 +259,17 @@ public class ASTBuilderTest {
 
     @Test
     public void templateQuoteInsert() {
-        TreepLexer lexer = new TreepLexer(CharStreams.fromString("`',x"));
+        java.lang.String expr = "`',x";
+        TreepLexer lexer = new TreepLexer(CharStreams.fromString(expr));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         TreepParser parser = new TreepParser(tokens);
         TreepParser.TopLevelTreeContext tree = parser.topLevelTree();
         Object ast = new ASTBuilder(new SimpleDatumParser(new NameSpace())).visit(tree);
         assertTrue(ast instanceof Cons);
         Cons cons = (Cons) ast;
+        Object sourceText = cons.metadata.get(Symbols.SOURCE_TEXT);
+        assertTrue(sourceText instanceof String);
+        assertEquals(expr, ((String) sourceText).string);
         assertEquals("template", ((Symbol) cons.getHead()).name);
         Object head = cons.getTail().getHead();
         assertTrue(head instanceof Cons);
