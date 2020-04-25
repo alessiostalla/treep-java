@@ -5,3 +5,5 @@ target/
 #IntelliJ IDEA files
 .idea/
 *.iml
+#ANTLR generated files
+gen/

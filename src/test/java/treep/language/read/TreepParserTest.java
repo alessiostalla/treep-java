@@ -2,6 +2,7 @@ package treep.language.read;
 
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.tree.TerminalNode;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -32,6 +33,33 @@ public class TreepParserTest {
         assertEquals(tree.getStart(), tree.getStop());
         assertEquals(TreepLexer.DATUM, tree.getStart().getType());
     }
+
+    @Test
+    public void stringSimple() {
+        TreepLexer lexer = new TreepLexer(CharStreams.fromString("\"aaa\""));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        TreepParser parser = new TreepParser(tokens);
+        TreepParser.TreeContext tree = parser.tree();
+        assertNotNull(tree);
+        assertEquals(0, parser.getNumberOfSyntaxErrors());
+        assertEquals(TreepLexer.DATUM_BEGIN, tree.getStart().getType());
+        assertEquals(TreepLexer.DATUM_END, tree.getStop().getType());
+        assertEquals("\"aaa\"", tree.getText());
+    }
+
+    @Test
+    public void stringInterpolatedSimple() {
+        TreepLexer lexer = new TreepLexer(CharStreams.fromString("\"aaa${42}bbb\""));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        TreepParser parser = new TreepParser(tokens);
+        TreepParser.TreeContext tree = parser.tree();
+        assertNotNull(tree);
+        assertEquals(0, parser.getNumberOfSyntaxErrors());
+        assertEquals(TreepLexer.DATUM_BEGIN, tree.getStart().getType());
+        assertEquals(TreepLexer.DATUM_END, tree.getStop().getType());
+        assertEquals("\"aaa${42}bbb\"", tree.getText());
+    }
+
 
     @Test
     public void treeEmpty() {

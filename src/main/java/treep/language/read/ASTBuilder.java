@@ -6,8 +6,6 @@ import org.antlr.v4.runtime.misc.Interval;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.pcollections.Empty;
-import org.pcollections.PCollection;
-import org.pcollections.PMap;
 import org.pcollections.PStack;
 import treep.language.Object;
 import treep.language.Symbols;
@@ -17,7 +15,7 @@ import treep.language.datatypes.tree.Tree;
 
 import java.util.List;
 
-public class ASTBuilder extends TreepBaseVisitor<Object> {
+public class ASTBuilder extends TreepParserBaseVisitor<Object> {
 
     protected final DatumParser datumParser;
 

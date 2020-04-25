@@ -1,10 +1,12 @@
-grammar Treep;
+parser grammar TreepParser;
+
+options { tokenVocab=TreepLexer; }
 
 @header {
     import java.util.*;
 }
 
-@parser::members {
+@members {
     Deque<Integer> indentation = new ArrayDeque<>();
 
     int countIndentation(String spaces) {
@@ -51,20 +53,8 @@ tree:
   modifier+=(INSERT | QUOTE | SPLICE_INSERT | TEMPLATE)* node node*
   ({checkIndentation()}? INDENT{pushIndentation();} tree{popIndentation();})*;
 
+node: modifier+=(INSERT | QUOTE | SPLICE_INSERT | TEMPLATE)* (atom | list);
+
+atom: DATUM | DATUM_BEGIN (DATUM | INTERPOLATION_START node INTERPOLATION_END)* DATUM_END;
+
 list: LPAREN (node | INDENT)* RPAREN; //TODO use modes to remove indent token?
-
-node: modifier+=(INSERT | QUOTE | SPLICE_INSERT | TEMPLATE)* (DATUM | list);
-
-LPAREN: '(';
-RPAREN: ')';
-INDENT: EMPTY_LINE+ (' ' | '\t')*;
-QUOTE: '\'';
-TEMPLATE: '`';
-SPLICE_INSERT: ',@';
-INSERT: ',';
-DATUM: (~(' ' | '\t' | '\r' | '\n' | '(' | ')' | '\'' | '`' | ','))+; //TODO escaping (using modes?)
-WS: (' ' | '\t') -> channel(HIDDEN);
-
-fragment EMPTY_LINE: ((' ' | '\t' | NEWLINE)* (NEWLINE | LINE_COMMENT)+)+;
-fragment LINE_COMMENT: '#' .*? NEWLINE+;
-fragment NEWLINE: '\r' |'\n';
