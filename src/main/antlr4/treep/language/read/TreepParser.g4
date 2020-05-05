@@ -55,6 +55,6 @@ tree:
 
 node: modifier+=(INSERT | QUOTE | SPLICE_INSERT | TEMPLATE)* (atom | list);
 
-atom: DATUM | DATUM_BEGIN (DATUM | INTERPOLATION_START node INTERPOLATION_END)* DATUM_END;
+atom: DATUM | DATUM_BEGIN (DATUM | node)* DATUM_END;
 
-list: LPAREN (node | INDENT)* RPAREN; //TODO use modes to remove indent token?
+list: LPAREN (node | INDENT)* RPAREN;

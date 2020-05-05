@@ -1,5 +1,6 @@
 package treep.language.read;
 
+import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.misc.Interval;
@@ -23,6 +24,28 @@ public class ASTBuilder extends TreepParserBaseVisitor<Object> {
         this.datumParser = datumParser;
     }
 
+    public Object visitGeneric(ParseTree parseTree, Parser parser) {
+        if(parseTree instanceof TerminalNode) {
+            return datumParser.parse(reconstructText((TerminalNode) parseTree));
+        } else if(parseTree instanceof ParserRuleContext) {
+            ParserRuleContext ctx = (ParserRuleContext) parseTree;
+            String ruleName = parser.getRuleNames()[ctx.getRuleIndex()];
+            Object head = datumParser.parse(ruleName);
+            PStack<Object> children = Empty.stack();
+            for(ParseTree child : ctx.children) {
+                children = children.plus(visitGeneric(child, parser));
+            }
+            Cons tree = new Cons(head);
+            for(Object child : children) {
+                tree = new Cons(child, tree);
+            }
+            recordSourceText(ctx, tree);
+            return tree;
+        } else {
+            throw new IllegalArgumentException("Not supported: " + parseTree);
+        }
+    }
+
     @Override
     public Object visitTopLevelTree(TreepParser.TopLevelTreeContext ctx) {
         return visit(ctx.tree());
@@ -30,13 +53,13 @@ public class ASTBuilder extends TreepParserBaseVisitor<Object> {
 
     @Override
     public Object visitTree(TreepParser.TreeContext ctx) {
-        PStack<Object> children = Empty.stack();
         if(ctx.node().size() == 1 && ctx.tree().isEmpty()) {
             Object node = ctx.node(0).accept(this);
             node = applyModifiers(node, ctx.modifier);
             recordSourceText(ctx, node);
             return node;
         }
+        PStack<Object> children = Empty.stack();
         for(ParseTree node : ctx.node()) {
             children = children.plus(node.accept(this));
         }
@@ -100,11 +123,17 @@ public class ASTBuilder extends TreepParserBaseVisitor<Object> {
         return datumParser.parse(token.getText());
     }
 
-    protected String reconstructText(ParserRuleContext parserRule) {
+    public static String reconstructText(TerminalNode terminalNode) {
+        Token symbol = terminalNode.getSymbol();
+        Interval interval = new Interval(symbol.getStartIndex(), symbol.getStopIndex());
+        return symbol.getInputStream().getText(interval);
+    }
+
+    public static String reconstructText(ParserRuleContext parserRule) {
         return parserRule.start.getInputStream().getText(textInterval(parserRule));
     }
 
-    protected Interval textInterval(ParserRuleContext parserRule) {
+    public static Interval textInterval(ParserRuleContext parserRule) {
         return new Interval(parserRule.start.getStartIndex(), parserRule.stop.getStopIndex());
     }
 

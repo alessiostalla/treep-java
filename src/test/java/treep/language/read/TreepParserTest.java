@@ -57,7 +57,8 @@ public class TreepParserTest {
         assertEquals(0, parser.getNumberOfSyntaxErrors());
         assertEquals(TreepLexer.DATUM_BEGIN, tree.getStart().getType());
         assertEquals(TreepLexer.DATUM_END, tree.getStop().getType());
-        assertEquals("\"aaa${42}bbb\"", tree.getText());
+        assertEquals("\"aaa42bbb\"", tree.getText());
+        assertEquals("\"aaa${42}bbb\"", ASTBuilder.reconstructText(tree));
     }
 
 

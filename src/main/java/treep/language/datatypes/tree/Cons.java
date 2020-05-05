@@ -3,7 +3,6 @@ package treep.language.datatypes.tree;
 import org.pcollections.Empty;
 import org.pcollections.PMap;
 import treep.language.Object;
-import treep.language.Symbols;
 import treep.language.datatypes.symbol.Symbol;
 
 public class Cons extends Object implements Tree {
